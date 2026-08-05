@@ -3,14 +3,21 @@ Description: A rental viewing scheduling system designed to reduce communication
 
 ## Project Status
 Current phase: Planning & Prototype
-Version: v0.10
-Last updated: 04 August 2026
+Version: v0.1.1
+Last updated: 05 August 2026
 
 ### Changelog
+
+#### v0.1.1 — 05 August 2026
+- Define User Roles
+- Define System Rules
+- Add Project Goals
+- Define Future Improvements
+
 #### v0.1.0 — 04 August 2026
 - Created project roadmap
 - Drafted README structure
-- Identify problem statement
+- Identify Problem Statement
 
 #### v0.0.1 — 03 August 2026
 - Repository initialized
@@ -68,18 +75,52 @@ The current process creates several problems:
 
 This becomes inefficient when every viewing requires individual coordination.
 
-## User Roles
+## Project Goals
+Create a viewing scheduling system that allows:
 
-...
+### Property Owners
+* Create and manage rental property listings.
+* Define available viewing schedules.
+* Reduce repetitive communication with renters.
+* Track viewing appointments and outcomes.
+
+### Renters
+* Browse available rental properties.
+* View available viewing slots.
+* Book suitable viewing times immediately.
+* Receive necessary viewing information after confirmation.
+
+
+## User Roles
+The system uses role-based accounts.
+
+## Property Owner
+Owners can:
+* Create rental property listings.
+* Configure recurring viewing availability.
+* Manage viewing appointments.
+* Update viewing outcomes.
+
+## Renter
+Renters can:
+* Browse available properties.
+* Select available viewing slots.
+* Manage their bookings.
+* Access viewing details after confirmation.
 
 ## System Rules
+# Account Rules
+* Each account is registered as either a Property Owner or Renter.
+* Account roles are determined during registration.
+* Account roles cannot be changed after registration.
+* Users requiring another role must create a separate account.
 
-...
+
+
 
 ## Design Decisions
 
 ...
 
 ## Future Improvements
-
-...
+* Support multi-role accounts where users can act as both property owners and renters.
