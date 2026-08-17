@@ -2,11 +2,16 @@
 Description: A rental viewing scheduling system designed to reduce communication friction between property owners and potential renters.
 
 ## Project Status
-Current phase: Planning & Prototype
-Version: v0.1.2
-Last updated: 06 August 2026
+Current phase: Prototype Design
+Version: v0.2.0
+Last updated: 17 August 2026
 
 ### Changelog
+
+#### v0.2.0 — 17 August 2026
+- Update System Rules
+- Add Database Design
+- Add Login interface & Register interface
 
 #### v0.1.2 — 06 August 2026
 - Define MVP Scope
@@ -29,13 +34,6 @@ Last updated: 06 August 2026
 - Repository initialized
 - Initial project planning
 
-
-Upcoming:
-⬜ Figma prototype
-⬜ Logic testing
-⬜ Development
-
----
 
 ## Development Roadmap
 
@@ -203,3 +201,97 @@ Reason:
 ## Future Improvements
 * Support multi-role accounts where users can act as both property owners and renters.
 ---
+
+
+## Database Design
+
+The initial database design consists of four core entities: Users, Property, Viewing, and Bookings.
+
+![Rental Scheduling System ERD](docs/database/erd-v0.1.png)
+
+### USERS Table
+user_ID              INT / UUID, PK
+user_Name            VARCHAR
+user_Email           VARCHAR, UNIQUE
+user_Password        VARCHAR
+user_Role            ENUM('OWNER', 'RENTER')
+user_Status          ENUM('ACTIVE', 'INACTIVE')
+user_Created_At      TIMESTAMP
+user_Updated_At      TIMESTAMP
+
+Users.role
+- OWNER
+- RENTER
+
+Users.status
+- ACTIVE
+- INACTIVE
+---
+
+### PROPERTY Table
+property_ID               INT / UUID, PK
+user_ID                   INT / UUID, FK
+property_name             VARCHAR
+property_Unit_Number      VARCHAR
+property_image_Url        VARCHAR
+property_Maps_Url         VARCHAR
+property_Description      TEXT
+property_Rent             DECIMAL
+propert_Status            ENUM('AVAILABLE', 'RENTED', 'HIDDEN')
+property_Created_At       TIMESTAMP
+property_Updated_At       TIMESTAMP
+
+Properties.property_type
+- ROOM
+- APARTMENT
+- CONDO
+- HOUSE
+
+Properties.status
+- AVAILABLE
+- RENTED
+- HIDDEN
+---
+
+### VIEWING Table
+view_ID                INT / UUID, PK
+property_ID            INT / UUID, FK
+view_Date              DATE
+view_Start_Time        TIME
+view_End_Time          TIME
+view_Status            ENUM('AVAILABLE', 'BOOKED', 'UNAVAILABLE')
+view_Created_At        TIMESTAMP
+view_Updated_At        TIMESTAMP
+
+ViewingSlots.status
+- AVAILABLE
+- BOOKED
+- UNAVAILABLE
+
+---
+
+### BOOKING Table
+booking_ID            INT / UUID, PK
+view_ID               INT / UUID, FK
+user_ID               INT / UUID, FK
+booking_Status        ENUM('CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW')
+booking_Created_At    TIMESTAMP
+booking_Updated_At    TIMESTAMP
+
+Bookings.status
+- CONFIRMED
+- CANCELLED
+- COMPLETED
+- NO_SHOW
+---
+
+
+
+
+
+
+
+
+
+
+
