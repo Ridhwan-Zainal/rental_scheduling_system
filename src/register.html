@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Rental Scheduling System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <main class="auth-container">
+        <h1>Rental Scheduling System</h1>
+        <h2>Create Account</h2>
+
+        <form id="registerForm">
+
+            <label for="registerName">Name</label>
+            <input
+                type="text"
+                id="registerName"
+                placeholder="Enter your name"
+                required
+            >
+
+            <label for="registerEmail">Email</label>
+            <input
+                type="email"
+                id="registerEmail"
+                placeholder="Enter your email"
+                required
+            >
+
+            <label for="registerPassword">Password</label>
+            <input
+                type="password"
+                id="registerPassword"
+                placeholder="Enter your password"
+                required
+            >
+
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+                type="password"
+                id="confirmPassword"
+                placeholder="Confirm your password"
+                required
+            >
+
+            <label for="registerRole">Account Type</label>
+            <select id="registerRole" required>
+                <option value="">Select account type</option>
+                <option value="OWNER">Owner</option>
+                <option value="RENTER">Renter</option>
+            </select>
+
+            <button type="submit">Register</button>
+
+        </form>
+
+        <p id="registerMessage"></p>
+
+        <p>
+            Already have an account?
+            <a href="login.html">Login</a>
+        </p>
+
+    </main>
+
+    <script src="js/auth.js"></script>
+</body>
+</html>
