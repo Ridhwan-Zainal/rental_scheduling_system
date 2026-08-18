@@ -3,10 +3,15 @@ Description: A rental viewing scheduling system designed to reduce communication
 
 ## Project Status
 Current phase: Prototype Design
-Version: v0.2.0
-Last updated: 17 August 2026
+Version: v0.2.1
+Last updated: 18 August 2026
 
 ### Changelog
+
+#### v0.2.1 — 18 August 2026
+- Update System Rules
+- Add Owner dashboard interface
+- Add Property interface
 
 #### v0.2.0 — 17 August 2026
 - Update System Rules
@@ -55,14 +60,11 @@ Testing & Refinement
 Milestone 6:
 Deployment & Presentation
 
----
-
 ## Project Overview
 Rental Viewing Schedule helps property owners manage rental unit viewing availability while allowing renters to directly select and book suitable viewing time slots.
 
 The system aims to reduce the manual coordination usually required between owners and renters, such as negotiating viewing times, confirming appointments, and sharing viewing details.
 
----
 ## Problem Statement
 Arranging rental property viewings often depends on manual communication between property owners and potential renters.
 
@@ -75,7 +77,6 @@ The current process creates several problems:
 
 This becomes inefficient when every viewing requires individual coordination.
 
----
 ## Project Goals
 Create a viewing scheduling system that allows:
 
@@ -91,7 +92,6 @@ Create a viewing scheduling system that allows:
 * Book suitable viewing times immediately.
 * Receive necessary viewing information after confirmation.
 
----
 ## User Roles
 The system uses role-based accounts.
 
@@ -109,7 +109,6 @@ Renters can:
 * Manage their bookings.
 * Access viewing details after confirmation.
 
----
 ## MVP Scope
 *Objective:*
 Allow property owners and renters to complete the rental viewing process digitally.
@@ -142,8 +141,38 @@ The renter can:
 * View booking details.
 * Cancel a booking.
 
----
 ## System Design
+
+## Feature: Authentication & Authorization
+
+### Feature Rules
+* Users must authenticate before accessing protected features.
+* Each user has a role (Owner or Renter).
+* Users can only access functions allowed by their role.
+
+### Design Decision
+* Role-based access control (RBAC) is used to separate owner and renter permissions.
+
+### Future Improvement
+* Social login.
+* Two-factor authentication.
+* Passwordless login.
+
+## Platform Decision :Web Application
+Although a mobile application may provide a better experience, the first version focuses on a web application.
+
+### Design Decision 
+* Faster development cycle
+* Easier testing and iteration
+* Focus on validating core scheduling logic
+* Avoid unnecessary platform complexity during MVP stage
+
+### Future Improvement: Mobile Application
+A mobile application is planned as a future enhancement to improve user convenience through:
+* Push notifications
+* Mobile-first viewing experience
+* Easier appointment management
+* Integrated navigation features
 
 ## Feature: Viewing Management
 ### Feature Rules
@@ -164,7 +193,7 @@ Reason:
 ### Future Improvement
 * Add calendar synchronization.
 * Allow owners to block specific dates.
----
+
 ## Feature: Booking Management
 ### Feature Rules
 * Renters can only book available slots.
@@ -187,7 +216,7 @@ Reason:
 * Rescheduling workflow.
 * Automated reminders.
 * Waitlist system.
----
+
 ## Feature: Account Rules
 ### Feature Rules
 * Each account is registered as either a Property Owner or Renter.
@@ -195,75 +224,87 @@ Reason:
 * Account roles cannot be changed after registration.
 * Users requiring another role must create a separate account.
 
-## Design Decisions
+### Design Decisions
 * to maintain individual dashboard for a Property Owner or Renter.
 
-## Future Improvements
+### Future Improvements
 * Support multi-role accounts where users can act as both property owners and renters.
----
 
-
-## Database Design
+### Database Design
 
 The initial database design consists of four core entities: Users, Property, Viewing, and Bookings.
 
 ![Rental Scheduling System ERD](docs/database/erd-v0.1.png)
 
-### USERS Table
-user_ID              INT / UUID, PK
-user_Name            VARCHAR
-user_Email           VARCHAR, UNIQUE
-user_Password        VARCHAR
-user_Role            ENUM('OWNER', 'RENTER')
-user_Status          ENUM('ACTIVE', 'INACTIVE')
-user_Created_At      TIMESTAMP
-user_Updated_At      TIMESTAMP
+### Core Tables
 
-Users.role
+- **Users** – Stores account and role information.
+- **Properties** – Stores rental properties belonging to owners.
+- **Viewing Slots** – Stores available viewing dates and times.
+- **Bookings** – Connects renters with selected viewing slots.
+
+### USERS Table
+| Attribute | Type | Key | Description |
+|---|---|---|---|
+| user_ID | INT | PK | Unique user identifier |
+| user_Name | VARCHAR(100) | | User's name |
+| user_Email | VARCHAR(255) | UNIQUE | User's email address |
+| user_Password_Hash | VARCHAR(255) | | Hashed user password |
+| user_Role | VARCHAR(20) | | OWNER or RENTER |
+| user_Status | VARCHAR(20) | | ACTIVE or INACTIVE |
+| user_Created_At | TIMESTAMP | | Account creation timestamp |
+| user_Updated_At | TIMESTAMP | | Last account update |
+
+user_Role
 - OWNER
 - RENTER
 
-Users.status
+user_Status
 - ACTIVE
 - INACTIVE
 ---
 
 ### PROPERTY Table
-property_ID               INT / UUID, PK
-user_ID                   INT / UUID, FK
-property_name             VARCHAR
-property_Unit_Number      VARCHAR
-property_image_Url        VARCHAR
-property_Maps_Url         VARCHAR
-property_Description      TEXT
-property_Rent             DECIMAL
-propert_Status            ENUM('AVAILABLE', 'RENTED', 'HIDDEN')
-property_Created_At       TIMESTAMP
-property_Updated_At       TIMESTAMP
+| Attribute | Type | Key | Description |
+|---|---|---|---|
+| property_ID | INT | PK | Unique property identifier |
+| user_ID | INT | FK | References Users.user_ID |
+| property_Name | VARCHAR(150) | | Property/listing name |
+| property_Type | VARCHAR(30) | | ROOM, APARTMENT, CONDO, or HOUSE |
+| property_Unit | VARCHAR(50) | | Unit/block/room information |
+| property_GMap_URL | VARCHAR(255) | | Google Maps location URL |
+| property_Image_URL | VARCHAR(255) | | Property image path or URL |
+| property_Description | TEXT | | Property description |
+| property_Rent | DECIMAL(10,2) | | Monthly rental price |
+| property_Status | VARCHAR(20) | | AVAILABLE, RENTED, or HIDDEN |
+| property_Created_At | TIMESTAMP | | Property creation timestamp |
+| property_Updated_At | TIMESTAMP | | Last property update |
 
-Properties.property_type
+property_Type
 - ROOM
 - APARTMENT
 - CONDO
 - HOUSE
 
-Properties.status
+properties_Status
 - AVAILABLE
 - RENTED
 - HIDDEN
 ---
 
 ### VIEWING Table
-view_ID                INT / UUID, PK
-property_ID            INT / UUID, FK
-view_Date              DATE
-view_Start_Time        TIME
-view_End_Time          TIME
-view_Status            ENUM('AVAILABLE', 'BOOKED', 'UNAVAILABLE')
-view_Created_At        TIMESTAMP
-view_Updated_At        TIMESTAMP
+| Attribute | Type | Key | Description |
+|---|---|---|---|
+| view_ID | INT | PK | Unique viewing slot identifier |
+| property_ID | INT | FK | References Property.property_ID |
+| view_Date | DATE | | Viewing date |
+| view_Start_Time | TIME | | Start of predefined one-hour slot |
+| view_End_Time | TIME | | End of predefined one-hour slot |
+| view_Status | VARCHAR(20) | | AVAILABLE, BOOKED, or UNAVAILABLE |
+| view_Created_At | TIMESTAMP | | Slot creation timestamp |
+| view_Updated_At | TIMESTAMP | | Last slot update |
 
-ViewingSlots.status
+view_Status
 - AVAILABLE
 - BOOKED
 - UNAVAILABLE
@@ -271,14 +312,16 @@ ViewingSlots.status
 ---
 
 ### BOOKING Table
-booking_ID            INT / UUID, PK
-view_ID               INT / UUID, FK
-user_ID               INT / UUID, FK
-booking_Status        ENUM('CONFIRMED', 'CANCELLED', 'COMPLETED', 'NO_SHOW')
-booking_Created_At    TIMESTAMP
-booking_Updated_At    TIMESTAMP
+| Attribute | Type | Key | Description |
+|---|---|---|---|
+| booking_ID | INT | PK | Unique booking identifier |
+| view_ID | INT | FK | References Viewing.view_ID |
+| user_ID | INT | FK | References renter in Users.user_ID |
+| booking_Status | VARCHAR(20) | | CONFIRMED, CANCELLED, COMPLETED, or NO_SHOW |
+| booking_Created_At | TIMESTAMP | | Booking creation timestamp |
+| booking_Updated_At | TIMESTAMP | | Last booking update |
 
-Bookings.status
+booking.Status
 - CONFIRMED
 - CANCELLED
 - COMPLETED

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Availability | Rental Scheduling System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <header class="main-header">
+        <h1>Rental Scheduling System</h1>
+
+        <nav>
+            <a href="owner-dashboard.html">Dashboard</a>
+            <button type="button">Logout</button>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+
+        <section class="form-section">
+
+            <div class="page-heading">
+                <h2>Manage Viewing Availability</h2>
+                <p id="propertyNameDisplay"></p>
+            </div>
+
+            <form id="availabilityForm">
+
+                <label for="viewDate">Viewing Date</label>
+                <input
+                    type="date"
+                    id="viewDate"
+                    required
+                >
+
+                <h3>Available Time Slots</h3>
+
+                <div class="slot-list">
+
+                    <label>
+                        <input type="checkbox" name="slot" value="09:00-10:00">
+                        9:00 AM - 10:00 AM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="10:00-11:00">
+                        10:00 AM - 11:00 AM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="11:00-12:00">
+                        11:00 AM - 12:00 PM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="12:00-13:00">
+                        12:00 PM - 1:00 PM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="13:00-14:00">
+                        1:00 PM - 2:00 PM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="14:00-15:00">
+                        2:00 PM - 3:00 PM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="15:00-16:00">
+                        3:00 PM - 4:00 PM
+                    </label>
+
+                    <label>
+                        <input type="checkbox" name="slot" value="16:00-17:00">
+                        4:00 PM - 5:00 PM
+                    </label>
+
+                </div>
+
+                <p id="availabilityMessage"></p>
+
+                <div class="form-actions">
+                    <a href="owner-dashboard.html">Cancel</a>
+                    <button type="submit">Save Availability</button>
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    <script src="js/viewing.js"></script>
+</body>
+</html>

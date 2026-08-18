@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard | Rental Scheduling System</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <header class="main-header">
+        <h1>Rental Scheduling System</h1>
+
+        <nav>
+            <span>Owner Dashboard</span>
+            <button type="button">Logout</button>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+
+        <section class="dashboard-heading">
+            <div>
+                <h2>My Properties</h2>
+                <p>Manage your rental properties and viewing availability.</p>
+            </div>
+
+            <a href="add-property.html" class="button-link">
+                 + Add Property
+            </a>
+        </section>
+
+        <section class="property-list" id="propertyList">
+
+            <!-- Empty state for now -->
+            <div class="empty-state">
+                <h3>No properties yet</h3>
+                <p>Add your first property to start managing viewing schedules.</p>
+            </div>
+
+        </section>
+
+    </main>
+<script src="js/property.js"></script>
+</body>
+</html>
