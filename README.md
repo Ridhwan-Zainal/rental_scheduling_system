@@ -312,7 +312,26 @@ The initial database design consists of four core entities: Users, Property, Vie
 
 ---
 
+## Functional Prototype
 
+The current prototype demonstrates the core rental viewing
+scheduling workflow using HTML, CSS, JavaScript, and localStorage.
+
+### Owner — Manage Viewing Availability
+
+![Owner Availability](docs/screenshots/prototype/owner-availability.png)
+
+### Renter — Browse Available Properties
+
+![Renter Properties](docs/screenshots/prototype/renter-properties.png)
+
+### Renter — Booking Management
+
+![Renter Bookings](docs/screenshots/prototype/renter-bookings.png)
+
+### Owner — Manage Bookings
+
+![Owner Bookings](docs/screenshots/prototype/owner-bookings.png)
 
 
 
