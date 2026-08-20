@@ -320,19 +320,19 @@ scheduling workflow using HTML, CSS, JavaScript, and localStorage.
 
 ### Owner — Manage Viewing Availability
 
-![Owner Availability](docs/screenshots/prototype/owner-availability.png)
+![Owner Availability](docs/screenshots/prototype/owner-availability.PNG)
 
 ### Renter — Browse Available Properties
 
-![Renter Properties](docs/screenshots/prototype/renter-properties.png)
+![Renter Properties](docs/screenshots/prototype/renter-properties.PNG)
 
 ### Renter — Booking Management
 
-![Renter Bookings](docs/screenshots/prototype/renter-bookings.png)
+![Renter Bookings](docs/screenshots/prototype/renter-bookings.PNG)
 
 ### Owner — Manage Bookings
 
-![Owner Bookings](docs/screenshots/prototype/owner-bookings.png)
+![Owner Bookings](docs/screenshots/prototype/owner-bookings.PNG)
 
 
 
