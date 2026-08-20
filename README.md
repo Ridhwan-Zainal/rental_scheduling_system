@@ -1,12 +1,20 @@
-# Rental Viewing Schedule
+# Rental Scheduling System
 Description: A rental viewing scheduling system designed to reduce communication friction between property owners and potential renters.
 
 ## Project Status
 Current phase: Prototype Design
-Version: v0.2.1
-Last updated: 18 August 2026
+Version: v0.2.2
+Last updated: 20 August 2026
 
 ### Changelog
+
+#### v0.2.2 — 20 August 2026
+- Update Booking Management Rules
+- Update Viewing Management RulesA
+- Update Owner dashboard interface
+- Add Renter dashboard interface
+- Add Property listing interface
+- Add Booking confirmation interface
 
 #### v0.2.1 — 18 August 2026
 - Update System Rules
@@ -61,7 +69,7 @@ Milestone 6:
 Deployment & Presentation
 
 ## Project Overview
-Rental Viewing Schedule helps property owners manage rental unit viewing availability while allowing renters to directly select and book suitable viewing time slots.
+Rental Scheduling System helps property owners manage rental unit viewing availability while allowing renters to directly select and book suitable viewing time slots.
 
 The system aims to reduce the manual coordination usually required between owners and renters, such as negotiating viewing times, confirming appointments, and sharing viewing details.
 
@@ -178,6 +186,8 @@ A mobile application is planned as a future enhancement to improve user convenie
 ### Feature Rules
 * Each viewing slot belongs to one property.
 * A viewing slot has an availability status.
+* Owners can only create viewing availability for the current date or future dates.
+* Viewing availability cannot be created for past dates.
 * A slot can only have one active booking.
 * Once booked, the slot becomes unavailable.
 * Cancelled bookings may release the slot based on cancellation rules.
@@ -197,6 +207,8 @@ Reason:
 ## Feature: Booking Management
 ### Feature Rules
 * Renters can only book available slots.
+* Renters can only select viewing dates from the current date onward.
+* Past viewing dates cannot be selected for new bookings.
 * A booking has statuses:
   * Confirmed
   * Cancelled
@@ -255,13 +267,6 @@ The initial database design consists of four core entities: Users, Property, Vie
 | user_Created_At | TIMESTAMP | | Account creation timestamp |
 | user_Updated_At | TIMESTAMP | | Last account update |
 
-user_Role
-- OWNER
-- RENTER
-
-user_Status
-- ACTIVE
-- INACTIVE
 ---
 
 ### PROPERTY Table
@@ -280,17 +285,6 @@ user_Status
 | property_Created_At | TIMESTAMP | | Property creation timestamp |
 | property_Updated_At | TIMESTAMP | | Last property update |
 
-property_Type
-- ROOM
-- APARTMENT
-- CONDO
-- HOUSE
-
-properties_Status
-- AVAILABLE
-- RENTED
-- HIDDEN
----
 
 ### VIEWING Table
 | Attribute | Type | Key | Description |
@@ -304,11 +298,6 @@ properties_Status
 | view_Created_At | TIMESTAMP | | Slot creation timestamp |
 | view_Updated_At | TIMESTAMP | | Last slot update |
 
-view_Status
-- AVAILABLE
-- BOOKED
-- UNAVAILABLE
-
 ---
 
 ### BOOKING Table
@@ -321,11 +310,6 @@ view_Status
 | booking_Created_At | TIMESTAMP | | Booking creation timestamp |
 | booking_Updated_At | TIMESTAMP | | Last booking update |
 
-booking.Status
-- CONFIRMED
-- CANCELLED
-- COMPLETED
-- NO_SHOW
 ---
 
 

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Property Details | Rental Scheduling System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <header class="main-header">
+
+        <h1>Rental Scheduling System</h1>
+
+        <nav>
+            <a href="renter-home.html">Browse Properties</a>
+            <a href="renter-bookings.html">
+                My Bookings
+            </a>
+            <button type="button">Logout</button>
+        </nav>
+
+    </header>
+
+
+    <main class="dashboard-container">
+
+        <section class="form-section">
+
+            <div class="page-heading">
+
+                <h2 id="propertyName">
+                    Property Details
+                </h2>
+
+                <p id="propertyType"></p>
+
+            </div>
+
+
+            <!-- PUBLIC PROPERTY INFORMATION -->
+
+            <div id="propertyDetails">
+
+                <p>
+                    <strong>Monthly Rent:</strong>
+                    <span id="propertyRent"></span>
+                </p>
+
+                <p>
+                    <strong>Description:</strong>
+                </p>
+
+                <p id="propertyDescription"></p>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- VIEWING AVAILABILITY -->
+
+            <section>
+
+                <h3>Available Viewing Slots</h3>
+
+                <p>
+                    Select a date to view available
+                    appointment times.
+                </p>
+
+
+                <label for="renterViewDate">
+                    Viewing Date
+                </label>
+
+                <input
+                    type="date"
+                    id="renterViewDate"
+                >
+
+
+                <div
+                    id="availableSlots"
+                    class="slot-list"
+                >
+                    <p>
+                        Select a date to view
+                        available slots.
+                    </p>
+                </div>
+
+            </section>
+
+
+            <p id="bookingMessage"></p>
+
+
+            <div class="form-actions">
+
+                <a href="renter-home.html">
+                    Back
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/renter.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Confirm Booking | Rental Scheduling System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <header class="main-header">
+
+        <h1>Rental Scheduling System</h1>
+
+        <nav>
+            <a href="renter-home.html">Browse Properties</a>
+            <a href="renter-bookings.html">
+                My Bookings
+            </a>
+            <button type="button">Logout</button>
+        </nav>
+
+    </header>
+
+
+    <main class="dashboard-container">
+
+        <section class="form-section">
+
+            <div class="page-heading">
+
+                <h2>Confirm Viewing Booking</h2>
+
+                <p>
+                    Review your viewing appointment
+                    before confirming.
+                </p>
+
+            </div>
+
+
+            <!-- BOOKING SUMMARY -->
+
+            <div class="booking-summary">
+
+                <p>
+                    <strong>Property:</strong>
+                    <span id="bookingPropertyName"></span>
+                </p>
+
+                <p>
+                    <strong>Property Type:</strong>
+                    <span id="bookingPropertyType"></span>
+                </p>
+
+                <p>
+                    <strong>Monthly Rent:</strong>
+                    <span id="bookingPropertyRent"></span>
+                </p>
+
+                <hr>
+
+                <p>
+                    <strong>Viewing Date:</strong>
+                    <span id="bookingDate"></span>
+                </p>
+
+                <p>
+                    <strong>Viewing Time:</strong>
+                    <span id="bookingTime"></span>
+                </p>
+
+            </div>
+
+
+            <!-- IMPORTANT RULE -->
+
+            <div class="booking-notice">
+
+                <h3>Viewing Reminder</h3>
+
+                <p>
+                    Please arrive on time for your
+                    scheduled viewing.
+                </p>
+
+                <p>
+                    Renters who arrive more than
+                    10 minutes late may be required
+                    to make a new booking.
+                </p>
+
+            </div>
+
+
+            <p id="bookingMessage"></p>
+
+
+            <div class="form-actions">
+
+                <a href="property-details.html">
+                    Back
+                </a>
+
+                <button
+                    type="button"
+                    id="confirmBookingBtn"
+                >
+                    Confirm Booking
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/booking.js"></script>
+
+</body>
+</html>

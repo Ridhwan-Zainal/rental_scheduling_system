@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Browse Properties | Rental Scheduling System</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dashboard-body">
+
+    <header class="main-header">
+
+        <h1>Rental Scheduling System</h1>
+
+        <nav>
+            <span>Browse Properties</span>
+           <a href="renter-bookings.html">
+                My Bookings
+           </a>
+            <button type="button">Logout</button>
+        </nav>
+
+    </header>
+
+
+    <main class="dashboard-container">
+
+        <!-- PAGE HEADING -->
+
+        <section class="dashboard-heading">
+
+            <div>
+                <h2>Available Properties</h2>
+
+                <p>
+                    Browse rental properties and schedule
+                    a viewing appointment.
+                </p>
+            </div>
+
+        </section>
+
+
+        <!-- FILTER -->
+
+        <section class="renter-filter">
+
+            <label for="propertyTypeFilter">
+                Property Type
+            </label>
+
+            <select id="propertyTypeFilter">
+
+                <option value="ALL">
+                    All Property Types
+                </option>
+
+                <option value="ROOM">
+                    Room
+                </option>
+
+                <option value="APARTMENT">
+                    Apartment
+                </option>
+
+                <option value="CONDO">
+                    Condo
+                </option>
+
+                <option value="HOUSE">
+                    House
+                </option>
+
+            </select>
+
+        </section>
+
+
+        <!-- PROPERTY LIST -->
+
+        <section
+            class="property-list"
+            id="renterPropertyList"
+        >
+        </section>
+
+    </main>
+
+
+    <script src="js/renter.js"></script>
+
+</body>
+</html>

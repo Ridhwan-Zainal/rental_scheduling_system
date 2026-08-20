@@ -37,6 +37,7 @@ const selectedProperty = properties.find(
 // ========================================
 
 if (propertyNameDisplay && selectedProperty) {
+
     propertyNameDisplay.textContent =
         `Property: ${selectedProperty.property_Name}`;
 }
@@ -52,53 +53,85 @@ function loadAvailability() {
         return;
     }
 
+
     // Clear all checkboxes first
+
     const checkboxes =
-        document.querySelectorAll('input[name="slot"]');
+        document.querySelectorAll(
+            'input[name="slot"]'
+        );
 
-    checkboxes.forEach(function (checkbox) {
-        checkbox.checked = false;
-    });
+    checkboxes.forEach(
+        function (checkbox) {
 
-    // Get saved viewing records
-    const viewings =
-        JSON.parse(localStorage.getItem("viewings")) || [];
-
-    // Find slots belonging to:
-    // 1. This property
-    // 2. This selected date
-    const savedSlots = viewings.filter(
-        viewing =>
-            String(viewing.property_ID) ===
-                String(selectedPropertyID) &&
-            viewing.view_Date === viewDate.value
+            checkbox.checked = false;
+        }
     );
 
+
+    // Get saved viewing records
+
+    const viewings =
+        JSON.parse(
+            localStorage.getItem("viewings")
+        ) || [];
+
+
+    // Find slots for this property and date
+
+    const savedSlots =
+        viewings.filter(
+            viewing =>
+                String(
+                    viewing.property_ID
+                ) ===
+                    String(
+                        selectedPropertyID
+                    )
+
+                &&
+
+                viewing.view_Date ===
+                    viewDate.value
+        );
+
+
     // Check matching boxes
-    savedSlots.forEach(function (viewing) {
 
-        const slotValue =
-            `${viewing.view_Start_Time}-${viewing.view_End_Time}`;
+    savedSlots.forEach(
+        function (viewing) {
 
-        const checkbox =
-            document.querySelector(
-                `input[name="slot"][value="${slotValue}"]`
-            );
+            const slotValue =
+                `${viewing.view_Start_Time}-${viewing.view_End_Time}`;
 
-        if (checkbox) {
-            checkbox.checked = true;
+            const checkbox =
+                document.querySelector(
+                    `input[name="slot"][value="${slotValue}"]`
+                );
+
+            if (checkbox) {
+                checkbox.checked = true;
+            }
         }
-    });
+    );
+
 
     message.textContent = "";
 }
 
 
 // ========================================
-// DATE CHANGED
+// PREVENT PAST VIEWING DATES
 // ========================================
 
 if (viewDate) {
+
+    const today =
+        new Date().toLocaleDateString("en-CA");
+
+    viewDate.min = today;
+
+
     viewDate.addEventListener(
         "change",
         loadAvailability
@@ -118,24 +151,34 @@ if (availabilityForm) {
 
             event.preventDefault();
 
-            const selectedDate = viewDate.value;
+
+            const selectedDate =
+                viewDate.value;
+
 
             const selectedSlots =
                 document.querySelectorAll(
                     'input[name="slot"]:checked'
                 );
 
+
             if (!selectedDate) {
+
                 message.textContent =
                     "Please select a viewing date.";
+
                 return;
             }
 
+
             if (selectedSlots.length === 0) {
+
                 message.textContent =
                     "Please select at least one viewing slot.";
+
                 return;
             }
+
 
             let viewings =
                 JSON.parse(
@@ -147,48 +190,67 @@ if (availabilityForm) {
             // REMOVE OLD AVAILABILITY FOR THIS DATE
             // ========================================
 
-            viewings = viewings.filter(
-                viewing =>
-                    !(
-                        String(viewing.property_ID) ===
-                            String(selectedPropertyID) &&
-                        viewing.view_Date === selectedDate
-                    )
-            );
+            viewings =
+                viewings.filter(
+                    viewing =>
+                        !(
+                            String(
+                                viewing.property_ID
+                            ) ===
+                                String(
+                                    selectedPropertyID
+                                )
+
+                            &&
+
+                            viewing.view_Date ===
+                                selectedDate
+                        )
+                );
 
 
             // ========================================
             // CREATE UPDATED AVAILABILITY
             // ========================================
 
-            selectedSlots.forEach(function (slot) {
+            selectedSlots.forEach(
+                function (slot) {
 
-                const [startTime, endTime] =
-                    slot.value.split("-");
-
-                const viewing = {
-
-                    view_ID:
-                        Date.now() + Math.random(),
-
-                    property_ID:
-                        selectedPropertyID,
-
-                    view_Date:
-                        selectedDate,
-
-                    view_Start_Time:
+                    const [
                         startTime,
+                        endTime
+                    ] =
+                        slot.value.split("-");
 
-                    view_End_Time:
-                        endTime,
 
-                    view_Status:
-                        "AVAILABLE"
-                };
+                    const viewing = {
 
-                viewings.push(viewing);
-            });
+                        view_ID:
+                            Date.now() +
+                            Math.random(),
+
+                        property_ID:
+                            selectedPropertyID,
+
+                        view_Date:
+                            selectedDate,
+
+                        view_Start_Time:
+                            startTime,
+
+                        view_End_Time:
+                            endTime,
+
+                        view_Status:
+                            "AVAILABLE"
+                    };
+
+
+                    viewings.push(
+                        viewing
+                    );
+                }
+            );
 
 
             // ========================================
@@ -199,6 +261,7 @@ if (availabilityForm) {
                 "viewings",
                 JSON.stringify(viewings)
             );
+
 
             message.textContent =
                 "Viewing availability updated successfully.";

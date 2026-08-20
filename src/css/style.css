@@ -142,7 +142,6 @@ body:not(.dashboard-body) {
 
 .button-link {
     display: inline-block;
-
     padding: 11px 18px;
 
     background-color: #222;
@@ -187,6 +186,7 @@ body:not(.dashboard-body) {
 
 .property-card p {
     margin: 9px 0;
+    line-height: 1.5;
 }
 
 .property-actions {
@@ -196,6 +196,26 @@ body:not(.dashboard-body) {
 
     margin-top: 20px;
 }
+
+
+/* ========================================
+   RENTER FILTER
+======================================== */
+
+.renter-filter {
+    max-width: 320px;
+    margin-bottom: 25px;
+}
+
+.renter-filter label {
+    display: block;
+    margin-bottom: 7px;
+}
+
+
+/* ========================================
+   EMPTY STATE
+======================================== */
 
 .empty-state {
     grid-column: 1 / -1;
@@ -214,7 +234,7 @@ body:not(.dashboard-body) {
 }
 
 .empty-state p {
-    margin-bottom: 0;
+    margin-bottom: 18px;
     color: #666;
 }
 
@@ -226,7 +246,6 @@ body:not(.dashboard-body) {
 .form-section {
     max-width: 650px;
     margin: 0 auto;
-
     padding: 30px;
 
     background-color: white;
@@ -297,6 +316,11 @@ button:hover {
     opacity: 0.9;
 }
 
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;
@@ -336,7 +360,6 @@ button:hover {
 
     gap: 10px;
     padding: 12px;
-
     margin: 0;
 
     border: 1px solid #ddd;
@@ -355,6 +378,118 @@ button:hover {
     margin: 0;
 }
 
+.slot-list button {
+    width: 100%;
+}
+
+
+/* ========================================
+   BOOKING SUMMARY
+======================================== */
+
+.booking-summary {
+    padding: 20px;
+    margin-bottom: 20px;
+
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.booking-summary p {
+    margin: 10px 0;
+}
+
+.booking-summary hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 18px 0;
+}
+
+
+/* ========================================
+   BOOKING NOTICE
+======================================== */
+
+.booking-notice {
+    padding: 16px;
+    margin: 18px 0;
+
+    background-color: #f7f7f7;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+
+    line-height: 1.5;
+}
+
+.booking-notice h3 {
+    margin-top: 0;
+}
+
+
+/* ========================================
+   BOOKING LIST
+======================================== */
+
+.booking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.booking-card {
+    padding: 24px;
+
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.booking-card h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+.booking-card h4 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.booking-card p {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.booking-card hr {
+    border: 0;
+    border-top: 1px solid #e5e5e5;
+    margin: 20px 0;
+}
+
+.booking-card a {
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.booking-card a:hover {
+    text-decoration: underline;
+}
+
+
+/* ========================================
+   BOOKING ACTIONS
+======================================== */
+
+.booking-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
 
 /* ========================================
    MESSAGES
@@ -362,7 +497,8 @@ button:hover {
 
 #loginMessage,
 #registerMessage,
-#availabilityMessage {
+#availabilityMessage,
+#bookingMessage {
     min-height: 20px;
     margin-bottom: 10px;
     text-align: center;
@@ -382,6 +518,11 @@ button:hover {
         gap: 12px;
     }
 
+    .main-header nav {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
     .dashboard-container {
         width: 92%;
         margin: 25px auto;
@@ -398,5 +539,17 @@ button:hover {
 
     .form-section {
         padding: 22px;
+    }
+
+    .booking-card {
+        padding: 20px;
+    }
+
+    .booking-actions {
+        flex-direction: column;
+    }
+
+    .booking-actions button {
+        width: 100%;
     }
 }
