@@ -15,7 +15,7 @@ Last updated: 20 August 2026
 - Add Renter dashboard interface
 - Add Property listing interface
 - Add Booking confirmation interface
-- Add functional prototype screenshots demonstrating the current system flow.
+- Add functional prototype screenshots demonstrating the current system flow
 
 #### v0.2.1 — 18 August 2026
 - Update System Rules
