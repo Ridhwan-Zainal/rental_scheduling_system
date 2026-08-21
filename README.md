@@ -3,10 +3,20 @@ Description: A rental viewing scheduling system designed to reduce communication
 
 ## Project Status
 Current phase: Prototype Design
-Version: v0.2.2
-Last updated: 20 August 2026
+Version: v0.2.3
+Last updated: 22 August 2026
 
 ### Changelog
+
+#### v0.2.3 — 22 August 2026
+- Initialized Node.js and Express backend.
+- Connected the backend to the XAMPP MySQL database.
+- Created the USERS database table based on the existing ERD design.
+- Implemented database-backed user registration with password hashing.
+- Implemented user login with credential validation.
+- Added role-based routing for OWNER and RENTER users.
+- Added basic logout functionality using session storage.
+
 
 #### v0.2.2 — 20 August 2026
 - Update Booking Management Rules

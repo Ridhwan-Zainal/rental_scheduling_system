@@ -1,0 +1,28 @@
+{
+  "name": "rental_scheduling_system",
+  "version": "1.0.0",
+  "description": "Description: A rental viewing scheduling system designed to reduce communication friction between property owners and potential renters.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ridhwan-Zainal/rental_scheduling_system.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ridhwan-Zainal/rental_scheduling_system/issues"
+  },
+  "homepage": "https://github.com/Ridhwan-Zainal/rental_scheduling_system#readme",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "express": "^5.2.1",
+    "mysql2": "^3.23.4"
+  }
+}
