@@ -3,37 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Add Property | Rental Scheduling System</title>
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body class="dashboard-body">
 
     <header class="main-header">
+
         <h1>Rental Scheduling System</h1>
 
         <nav>
+            <span class="header-user">
+            Welcome,
+            <strong id="headerUserName"></strong>
+             </span>
             <a href="owner-dashboard.html">Dashboard</a>
+
             <button
-             type="button"
-             id="logoutButton"
-              >Logout
-            </button>  
+                type="button"
+                id="logoutButton"
+            >
+                Logout
+            </button>
         </nav>
+
     </header>
+
 
     <main class="dashboard-container">
 
         <section class="form-section">
 
             <div class="page-heading">
+
                 <h2>Add Property</h2>
-                <p>Add a new rental property to your listing.</p>
+
+                <p>
+                    Add a new rental property to your listing.
+                </p>
+
             </div>
+
 
             <form id="propertyForm">
 
-                <label for="propertyName">Property Name</label>
+
+                <!-- PROPERTY NAME -->
+
+                <label for="propertyName">
+                    Property Name
+                </label>
+
                 <input
                     type="text"
                     id="propertyName"
@@ -41,16 +64,86 @@
                     required
                 >
 
-                <label for="propertyType">Property Type</label>
-                <select id="propertyType" required>
-                    <option value="">Select property type</option>
-                    <option value="ROOM">Room</option>
-                    <option value="APARTMENT">Apartment</option>
-                    <option value="CONDO">Condo</option>
-                    <option value="HOUSE">House</option>
+
+                <!-- PROPERTY TYPE -->
+
+                <label for="propertyType">
+                    Property Type
+                </label>
+
+                <select
+                    id="propertyType"
+                    required
+                >
+                    <option value="">
+                        Select property type
+                    </option>
+
+                    <option value="ROOM">
+                        Room
+                    </option>
+
+                    <option value="APARTMENT">
+                        Apartment
+                    </option>
+
+                    <option value="CONDO">
+                        Condo
+                    </option>
+
+                    <option value="HOUSE">
+                        House
+                    </option>
                 </select>
 
-                <label for="propertyUnit">Unit / Block / Room</label>
+
+                <!-- STATE -->
+
+                <label for="propertyState">
+                    State
+                </label>
+
+                <select
+                    id="propertyState"
+                    required
+                >
+                    <option value="">
+                        Select state
+                    </option>
+
+                    <option value="Selangor">
+                        Selangor
+                    </option>
+
+                    <option value="Kuala Lumpur">
+                        Kuala Lumpur
+                    </option>
+                </select>
+
+
+                <!-- CITY -->
+
+                <label for="propertyCity">
+                    City
+                </label>
+
+                <select
+                    id="propertyCity"
+                    required
+                    disabled
+                >
+                    <option value="">
+                        Select city
+                    </option>
+                </select>
+
+
+                <!-- UNIT -->
+
+                <label for="propertyUnit">
+                    Unit / Block / Room
+                </label>
+
                 <input
                     type="text"
                     id="propertyUnit"
@@ -58,7 +151,13 @@
                     required
                 >
 
-                <label for="propertyMap">Google Maps URL</label>
+
+                <!-- GOOGLE MAPS -->
+
+                <label for="propertyMap">
+                    Google Maps URL
+                </label>
+
                 <input
                     type="url"
                     id="propertyMap"
@@ -66,23 +165,39 @@
                     required
                 >
 
-                <label for="propertyImage">Property Image</label>
+
+                <!-- PROPERTY IMAGE -->
+
+                <label for="propertyImage">
+                    Property Image
+                </label>
+
                 <input
                     type="file"
                     id="propertyImage"
                     accept="image/*"
-                    required
                 >
 
-                <label for="propertyDescription">Description</label>
+
+                <!-- DESCRIPTION -->
+
+                <label for="propertyDescription">
+                    Description
+                </label>
+
                 <textarea
                     id="propertyDescription"
                     rows="5"
                     placeholder="Enter property description"
-                    required
                 ></textarea>
 
-                <label for="propertyRent">Monthly Rent (RM)</label>
+
+                <!-- RENT -->
+
+                <label for="propertyRent">
+                    Monthly Rent (RM)
+                </label>
+
                 <input
                     type="number"
                     id="propertyRent"
@@ -92,9 +207,24 @@
                     required
                 >
 
+
+                <!-- MESSAGE -->
+
+                <p id="propertyMessage"></p>
+
+
+                <!-- ACTIONS -->
+
                 <div class="form-actions">
-                    <a href="owner-dashboard.html">Cancel</a>
-                    <button type="submit">Add Property</button>
+
+                    <a href="owner-dashboard.html">
+                        Cancel
+                    </a>
+
+                    <button type="submit">
+                        Add Property
+                    </button>
+
                 </div>
 
             </form>
@@ -102,7 +232,10 @@
         </section>
 
     </main>
-<script src="js/property.js"></script>
-<script src="js/logout.js"></script>
+
+    <script src="js/welcome.js"></script>
+    <script src="js/property.js"></script>
+    <script src="js/logout.js"></script>
+
 </body>
 </html>

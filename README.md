@@ -2,11 +2,22 @@
 Description: A rental viewing scheduling system designed to reduce communication friction between property owners and potential renters.
 
 ## Project Status
-Current phase: Prototype Design
-Version: v0.2.3
+Current phase: Application Development
+Version: v0.2.4
 Last updated: 22 August 2026
 
 ### Changelog
+
+#### v0.2.4 — 22 August 2026
+- Add property.State
+- Add property.City
+- Created the PROPERTY, VIEWING, and BOOKINGS database table based on the updated ERD design.
+- Connected renter property browsing and viewing availability to MySQL.
+- Implemented transactional viewing booking.
+- Added renter booking history and confirmed-location details.
+- Added 24-hour booking cancellation rule and slot reopening.
+- Added owner booking management with completed and no-show statuses.
+- Added logged-in user name display.
 
 #### v0.2.3 — 22 August 2026
 - Initialized Node.js and Express backend.
@@ -257,7 +268,7 @@ Reason:
 
 The initial database design consists of four core entities: Users, Property, Viewing, and Bookings.
 
-![Rental Scheduling System ERD](docs/database/erd-v0.1.png)
+![Rental Scheduling System ERD](docs/database/erd-v0.2.png)
 
 ### Core Tables
 
@@ -288,6 +299,8 @@ The initial database design consists of four core entities: Users, Property, Vie
 | property_Name | VARCHAR(150) | | Property/listing name |
 | property_Type | VARCHAR(30) | | ROOM, APARTMENT, CONDO, or HOUSE |
 | property_Unit | VARCHAR(50) | | Unit/block/room information |
+| property_City | VARCHAR(100) | | City or locality of the property |
+| property_State | VARCHAR(100) | | State or federal territory of the property |
 | property_GMap_URL | VARCHAR(255) | | Google Maps location URL |
 | property_Image_URL | VARCHAR(255) | | Property image path or URL |
 | property_Description | TEXT | | Property description |

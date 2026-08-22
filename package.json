@@ -23,6 +23,7 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "express": "^5.2.1",
+    "multer": "^2.2.0",
     "mysql2": "^3.23.4"
   }
 }

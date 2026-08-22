@@ -1,32 +1,13 @@
 // ========================================
-// STORAGE HELPERS
+// CURRENT USER
 // ========================================
 
-function getProperties() {
+function getCurrentUser() {
+
     return JSON.parse(
-        localStorage.getItem("properties")
-    ) || [];
-}
-
-
-function getViewings() {
-    return JSON.parse(
-        localStorage.getItem("viewings")
-    ) || [];
-}
-
-
-function getBookings() {
-    return JSON.parse(
-        localStorage.getItem("bookings")
-    ) || [];
-}
-
-
-function saveBookings(bookings) {
-    localStorage.setItem(
-        "bookings",
-        JSON.stringify(bookings)
+        sessionStorage.getItem(
+            "currentUser"
+        )
     );
 }
 
@@ -42,41 +23,56 @@ const ownerBookingList =
 
 
 // ========================================
-// DISPLAY BOOKINGS
+// FORMAT DATE
 // ========================================
 
-function displayOwnerBookings() {
+function formatDate(
+    dateValue
+) {
+
+    const date =
+        new Date(
+            `${dateValue}T00:00:00`
+        );
+
+
+    return date.toLocaleDateString(
+        "en-MY",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    );
+}
+
+
+// ========================================
+// LOAD OWNER BOOKINGS
+// ========================================
+
+async function displayOwnerBookings() {
 
     if (!ownerBookingList) {
         return;
     }
 
 
-    const bookings =
-        getBookings();
-
-    const viewings =
-        getViewings();
-
-    const properties =
-        getProperties();
+    const currentUser =
+        getCurrentUser();
 
 
-    // ========================================
-    // EMPTY STATE
-    // ========================================
-
-    if (bookings.length === 0) {
+    if (!currentUser) {
 
         ownerBookingList.innerHTML = `
-
             <div class="empty-state">
 
-                <h3>No bookings yet</h3>
+                <h3>
+                    Not logged in
+                </h3>
 
                 <p>
-                    Confirmed renter viewing bookings
-                    will appear here.
+                    Please log in to view bookings.
                 </p>
 
             </div>
@@ -86,130 +82,266 @@ function displayOwnerBookings() {
     }
 
 
-    ownerBookingList.innerHTML = "";
+    if (
+        currentUser.user_Role !==
+        "OWNER"
+    ) {
 
-
-    // ========================================
-    // CREATE BOOKING CARDS
-    // ========================================
-
-    bookings.forEach(
-        function (booking) {
-
-
-            const viewing =
-                viewings.find(
-                    viewing =>
-                        String(
-                            viewing.view_ID
-                        ) ===
-                        String(
-                            booking.view_ID
-                        )
-                );
-
-
-            if (!viewing) {
-                return;
-            }
-
-
-            const property =
-                properties.find(
-                    property =>
-                        String(
-                            property.property_ID
-                        ) ===
-                        String(
-                            viewing.property_ID
-                        )
-                );
-
-
-            if (!property) {
-                return;
-            }
-
-
-            const card =
-                document.createElement("div");
-
-            card.classList.add(
-                "booking-card"
-            );
-
-
-            card.innerHTML = `
+        ownerBookingList.innerHTML = `
+            <div class="empty-state">
 
                 <h3>
-                    ${property.property_Name}
+                    Access denied
                 </h3>
 
                 <p>
-                    <strong>Renter:</strong>
-                    Demo Renter
+                    This page is for property owners.
                 </p>
 
-                <p>
-                    <strong>Date:</strong>
-                    ${viewing.view_Date}
-                </p>
+            </div>
+        `;
 
-                <p>
-                    <strong>Time:</strong>
-                    ${viewing.view_Start_Time}
-                    -
-                    ${viewing.view_End_Time}
-                </p>
-
-                <p>
-                    <strong>Status:</strong>
-                    ${booking.booking_Status}
-                </p>
-
-                <div class="booking-actions">
-
-                    ${
-                        booking.booking_Status ===
-                        "CONFIRMED"
-
-                        ? `
-
-                            <button
-                                type="button"
-                                onclick="updateBookingStatus(
-                                    '${booking.booking_ID}',
-                                    'COMPLETED'
-                                )"
-                            >
-                                Mark Completed
-                            </button>
+        return;
+    }
 
 
-                            <button
-                                type="button"
-                                onclick="updateBookingStatus(
-                                    '${booking.booking_ID}',
-                                    'NO_SHOW'
-                                )"
-                            >
-                                Mark No-Show
-                            </button>
+    try {
 
-                        `
+        const response =
+            await fetch(
+                `/api/owner/bookings?user_ID=${currentUser.user_ID}`
+            );
 
-                        : ""
-                    }
+
+        const bookings =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            ownerBookingList.innerHTML = `
+                <div class="empty-state">
+
+                    <h3>
+                        Unable to load bookings
+                    </h3>
+
+                    <p>
+                        ${bookings.message}
+                    </p>
 
                 </div>
             `;
 
-
-            ownerBookingList.appendChild(
-                card
-            );
+            return;
         }
-    );
+
+
+        // ========================================
+        // EMPTY STATE
+        // ========================================
+
+        if (
+            bookings.length === 0
+        ) {
+
+            ownerBookingList.innerHTML = `
+                <div class="empty-state">
+
+                    <h3>
+                        No bookings yet
+                    </h3>
+
+                    <p>
+                        Renter viewing appointments
+                        will appear here.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // ========================================
+        // DISPLAY BOOKINGS
+        // ========================================
+
+        ownerBookingList.innerHTML =
+            "";
+
+
+        bookings.forEach(
+            function (booking) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.classList.add(
+                    "booking-card"
+                );
+
+
+                const startTime =
+                    booking
+                        .view_Start_Time
+                        .substring(
+                            0,
+                            5
+                        );
+
+
+                const endTime =
+                    booking
+                        .view_End_Time
+                        .substring(
+                            0,
+                            5
+                        );
+
+
+                let actionSection =
+                    "";
+
+
+                if (
+                    booking.booking_Status ===
+                    "CONFIRMED"
+                ) {
+
+                    actionSection = `
+
+                        <button
+                            type="button"
+                            onclick="updateBookingStatus(
+                                '${booking.booking_ID}',
+                                'COMPLETED'
+                            )"
+                        >
+                            Mark Completed
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onclick="updateBookingStatus(
+                                '${booking.booking_ID}',
+                                'NO_SHOW'
+                            )"
+                        >
+                            Mark No-Show
+                        </button>
+                    `;
+                }
+
+            card.innerHTML = `
+
+                                <h3>
+                                  ${booking.property_Name}
+                                 </h3>
+
+                <div class="booking-card-content">
+
+                         <div class="booking-image-section">
+
+                                 ${
+                                 booking.property_Image_URL
+                                 ? `
+                                 <img
+                                    src="${booking.property_Image_URL}"
+                                    alt="${booking.property_Name}"
+                                    class="booking-property-image"
+                                    >
+                                     `
+                                  : ""
+                                 }
+
+                         </div>
+
+
+                         <div class="booking-info-section">
+
+                             <p>
+                                <strong>Renter:</strong>
+                                 ${booking.renter_Name}
+                            </p>
+
+                             <p>
+                                <strong>Renter Email:</strong>
+                                 ${booking.renter_Email}
+                             </p>
+
+                            <p>
+                                 <strong>Viewing Date:</strong>
+                                  ${formatDate(
+                                 booking.view_Date
+                             )}
+                             </p>
+
+                            <p>
+                                 <strong>Viewing Time:</strong>
+                                 ${startTime} - ${endTime}
+                             </p>
+
+                             <p>
+                                 <strong>Booking Status:</strong>
+                                 ${booking.booking_Status}
+                            </p>
+
+                             <p>
+                                 <strong>Property Location:</strong>
+                                 ${booking.property_City},
+                                ${booking.property_State}
+                            </p>
+
+                            <p>
+                                 <strong>Unit / Block / Room:</strong>
+                                ${booking.property_Unit}
+                             </p>
+
+
+                        <div class="booking-actions">
+
+                              ${actionSection}
+
+                         </div>
+
+                         </div>
+
+                </div>
+                `;
+             
+
+
+                ownerBookingList.appendChild(
+                    card
+                );
+            }
+        );
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        ownerBookingList.innerHTML = `
+            <div class="empty-state">
+
+                <h3>
+                    Unable to load bookings
+                </h3>
+
+                <p>
+                    Unable to connect to the server.
+                </p>
+
+            </div>
+        `;
+    }
 }
 
 
@@ -217,44 +349,71 @@ function displayOwnerBookings() {
 // UPDATE BOOKING STATUS
 // ========================================
 
-function updateBookingStatus(
+async function updateBookingStatus(
     bookingID,
     newStatus
 ) {
 
-    const bookings =
-        getBookings();
+    const currentUser =
+        getCurrentUser();
 
 
-    const bookingIndex =
-        bookings.findIndex(
-            booking =>
-                String(
-                    booking.booking_ID
-                ) ===
-                String(
-                    bookingID
-                )
-        );
-
-
-    if (bookingIndex === -1) {
+    if (!currentUser) {
         return;
     }
 
 
-    bookings[
-        bookingIndex
-    ].booking_Status =
-        newStatus;
+    try {
+
+        const response =
+            await fetch(
+                `/api/bookings/${bookingID}/status`,
+                {
+                    method:
+                        "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            user_ID:
+                                currentUser.user_ID,
+
+                            booking_Status:
+                                newStatus
+                        })
+                }
+            );
 
 
-    saveBookings(
-        bookings
-    );
+        const data =
+            await response.json();
 
 
-    displayOwnerBookings();
+        if (!response.ok) {
+
+            alert(
+                data.message
+            );
+
+            return;
+        }
+
+
+        displayOwnerBookings();
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Unable to update booking."
+        );
+    }
 }
 
 

@@ -1,94 +1,19 @@
 // ========================================
-// STORAGE HELPERS
+// CURRENT USER
 // ========================================
 
-function getProperties() {
+function getCurrentUser() {
 
     return JSON.parse(
-        localStorage.getItem("properties")
-    ) || [];
-}
-
-
-function getViewings() {
-
-    return JSON.parse(
-        localStorage.getItem("viewings")
-    ) || [];
-}
-
-
-function saveViewings(viewings) {
-
-    localStorage.setItem(
-        "viewings",
-        JSON.stringify(viewings)
-    );
-}
-
-
-function getBookings() {
-
-    return JSON.parse(
-        localStorage.getItem("bookings")
-    ) || [];
-}
-
-
-function saveBookings(bookings) {
-
-    localStorage.setItem(
-        "bookings",
-        JSON.stringify(bookings)
+        sessionStorage.getItem(
+            "currentUser"
+        )
     );
 }
 
 
 // ========================================
-// SELECTED VIEWING
-// ========================================
-
-const selectedViewingID =
-    localStorage.getItem(
-        "selectedViewingID"
-    );
-
-let viewings =
-    getViewings();
-
-
-const selectedViewing =
-    viewings.find(
-        viewing =>
-            String(viewing.view_ID) ===
-            String(selectedViewingID)
-    );
-
-
-// ========================================
-// SELECTED PROPERTY
-// ========================================
-
-let selectedProperty = null;
-
-
-if (selectedViewing) {
-
-    const properties =
-        getProperties();
-
-
-    selectedProperty =
-        properties.find(
-            property =>
-                String(property.property_ID) ===
-                String(selectedViewing.property_ID)
-        );
-}
-
-
-// ========================================
-// PAGE ELEMENTS
+// BOOKING PAGE ELEMENTS
 // ========================================
 
 const bookingPropertyName =
@@ -128,32 +53,188 @@ const confirmBookingBtn =
 
 
 // ========================================
-// DISPLAY BOOKING SUMMARY
+// SELECTED DATA
 // ========================================
 
-if (
-    selectedViewing &&
-    selectedProperty
+const selectedPropertyID =
+    sessionStorage.getItem(
+        "selectedRenterPropertyID"
+    );
+
+const selectedViewingID =
+    sessionStorage.getItem(
+        "selectedViewingID"
+    );
+
+
+// ========================================
+// LOAD BOOKING SUMMARY
+// ========================================
+
+async function loadBookingSummary() {
+
+    if (
+        !bookingPropertyName ||
+        !selectedPropertyID ||
+        !selectedViewingID
+    ) {
+        return;
+    }
+
+
+    try {
+
+        // ========================================
+        // LOAD PROPERTY
+        // ========================================
+
+        const propertyResponse =
+            await fetch(
+                `/api/properties/${selectedPropertyID}`
+            );
+
+
+        const property =
+            await propertyResponse.json();
+
+
+        if (!propertyResponse.ok) {
+
+            bookingMessage.textContent =
+                property.message;
+
+            return;
+        }
+
+
+        // ========================================
+        // LOAD VIEWING SLOT
+        // ========================================
+
+        const viewingResponse =
+            await fetch(
+                `/api/viewings/${selectedViewingID}`
+            );
+
+
+        const viewing =
+            await viewingResponse.json();
+
+
+        if (!viewingResponse.ok) {
+
+            bookingMessage.textContent =
+                viewing.message;
+
+            return;
+        }
+
+
+        // ========================================
+        // DISPLAY PROPERTY INFORMATION
+        // ========================================
+
+        bookingPropertyName.textContent =
+            property.property_Name;
+
+
+        bookingPropertyType.textContent =
+            property.property_Type;
+
+
+        bookingPropertyRent.textContent =
+            `RM ${property.property_Rent} / month`;
+
+
+        // ========================================
+        // DISPLAY VIEWING INFORMATION
+        // ========================================
+
+        bookingDate.textContent =
+            formatDate(
+                viewing.view_Date
+            );
+
+
+        const startTime =
+            viewing
+                .view_Start_Time
+                .substring(
+                    0,
+                    5
+                );
+
+
+        const endTime =
+            viewing
+                .view_End_Time
+                .substring(
+                    0,
+                    5
+                );
+
+
+        bookingTime.textContent =
+            `${startTime} - ${endTime}`;
+
+
+        // ========================================
+        // CHECK SLOT STATUS
+        // ========================================
+
+        if (
+            viewing.view_Status !==
+            "AVAILABLE"
+        ) {
+
+            bookingMessage.textContent =
+                "This viewing slot is no longer available.";
+
+
+            confirmBookingBtn.disabled =
+                true;
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        bookingMessage.textContent =
+            "Unable to load booking information.";
+    }
+}
+
+
+// ========================================
+// FORMAT DATE
+// ========================================
+
+function formatDate(
+    dateValue
 ) {
 
-    bookingPropertyName.textContent =
-        selectedProperty.property_Name;
+    const dateString =
+        dateValue.substring(
+            0,
+            10
+        );
 
 
-    bookingPropertyType.textContent =
-        selectedProperty.property_Type;
+    const date =
+        new Date(
+            `${dateString}T00:00:00`
+        );
 
 
-    bookingPropertyRent.textContent =
-        `RM ${selectedProperty.property_Rent} / month`;
-
-
-    bookingDate.textContent =
-        selectedViewing.view_Date;
-
-
-    bookingTime.textContent =
-        `${selectedViewing.view_Start_Time} - ${selectedViewing.view_End_Time}`;
+    return date.toLocaleDateString(
+        "en-MY",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    );
 }
 
 
@@ -165,117 +246,178 @@ if (confirmBookingBtn) {
 
     confirmBookingBtn.addEventListener(
         "click",
-        function () {
+        async function () {
+
+            const currentUser =
+                getCurrentUser();
 
 
             // ========================================
-            // VALIDATE VIEWING
+            // CHECK LOGIN
             // ========================================
 
-            if (!selectedViewing) {
+            if (!currentUser) {
 
                 bookingMessage.textContent =
-                    "Viewing slot could not be found.";
+                    "Please log in before booking.";
 
                 return;
             }
 
 
+            // ========================================
+            // CHECK RENTER ROLE
+            // ========================================
+
             if (
-                selectedViewing.view_Status !==
-                "AVAILABLE"
+                currentUser.user_Role !==
+                "RENTER"
             ) {
 
                 bookingMessage.textContent =
-                    "This viewing slot is no longer available.";
+                    "Only renters can create bookings.";
 
                 return;
             }
 
 
             // ========================================
-            // CREATE BOOKING
+            // CHECK VIEWING
             // ========================================
 
-            const bookings =
-                getBookings();
+            if (!selectedViewingID) {
 
+                bookingMessage.textContent =
+                    "No viewing slot selected.";
 
-            const booking = {
-
-                booking_ID:
-                    Date.now(),
-
-                view_ID:
-                    selectedViewing.view_ID,
-
-                // Temporary renter ID
-                // until real authentication exists
-                user_ID:
-                    "RENTER_DEMO",
-
-                booking_Status:
-                    "CONFIRMED",
-
-                booking_Created_At:
-                    new Date().toISOString()
-            };
-
-
-            bookings.push(
-                booking
-            );
-
-
-            saveBookings(
-                bookings
-            );
-
-
-            // ========================================
-            // CHANGE VIEWING STATUS
-            // ========================================
-
-            const viewingIndex =
-                viewings.findIndex(
-                    viewing =>
-                        String(
-                            viewing.view_ID
-                        ) ===
-                        String(
-                            selectedViewingID
-                        )
-                );
-
-
-            if (viewingIndex !== -1) {
-
-                viewings[
-                    viewingIndex
-                ].view_Status =
-                    "BOOKED";
+                return;
             }
 
 
-            saveViewings(
-                viewings
-            );
-
-
             // ========================================
-            // SUCCESS
+            // PREVENT DOUBLE CLICK
             // ========================================
-
-            bookingMessage.textContent =
-                "Booking confirmed successfully.";
-
 
             confirmBookingBtn.disabled =
                 true;
 
 
             confirmBookingBtn.textContent =
-                "Booking Confirmed";
+                "Confirming...";
+
+
+            // ========================================
+            // CREATE BOOKING
+            // ========================================
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/api/bookings",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    view_ID:
+                                        selectedViewingID,
+
+                                    user_ID:
+                                        currentUser.user_ID
+                                })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                // ========================================
+                // BOOKING FAILED
+                // ========================================
+
+                if (!response.ok) {
+
+                    bookingMessage.textContent =
+                        data.message;
+
+
+                    confirmBookingBtn.disabled =
+                        false;
+
+
+                    confirmBookingBtn.textContent =
+                        "Confirm Booking";
+
+
+                    return;
+                }
+
+
+                // ========================================
+                // BOOKING SUCCESS
+                // ========================================
+
+                bookingMessage.textContent =
+                    data.message;
+
+
+                sessionStorage.setItem(
+                    "lastBookingID",
+                    data.booking_ID
+                );
+
+
+                sessionStorage.removeItem(
+                    "selectedViewingID"
+                );
+
+
+                // ========================================
+                // REDIRECT
+                // ========================================
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "renter-home.html";
+                    },
+
+                    1200
+                );
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                bookingMessage.textContent =
+                    "Unable to complete booking.";
+
+
+                confirmBookingBtn.disabled =
+                    false;
+
+
+                confirmBookingBtn.textContent =
+                    "Confirm Booking";
+            }
         }
     );
 }
+
+
+// ========================================
+// INITIAL LOAD
+// ========================================
+
+loadBookingSummary();

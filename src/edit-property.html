@@ -3,74 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Edit Property | Rental Scheduling System</title>
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body class="dashboard-body">
 
     <header class="main-header">
+
         <h1>Rental Scheduling System</h1>
 
         <nav>
-            <a href="owner-dashboard.html">Dashboard</a>
+            <span class="header-user">
+            Welcome,
+            <strong id="headerUserName"></strong>
+             </span>
+             
+            <a href="owner-dashboard.html">
+                Dashboard
+            </a>
+
             <button
-             type="button"
-             id="logoutButton"
-              >Logout
-            </button>  
+                type="button"
+                id="logoutButton"
+            >
+                Logout
+            </button>
+
         </nav>
+
     </header>
+
 
     <main class="dashboard-container">
 
         <section class="form-section">
 
             <div class="page-heading">
+
                 <h2>Edit Property</h2>
-                <p>Update your rental property information.</p>
+
+                <p>
+                    Update your rental property information.
+                </p>
+
             </div>
+
 
             <form id="editPropertyForm">
 
-                <label for="editPropertyName">Property Name</label>
+
+                <label for="editPropertyName">
+                    Property Name
+                </label>
+
                 <input
                     type="text"
                     id="editPropertyName"
                     required
                 >
 
-                <label for="editPropertyType">Property Type</label>
-                <select id="editPropertyType" required>
-                    <option value="">Select property type</option>
-                    <option value="ROOM">Room</option>
-                    <option value="APARTMENT">Apartment</option>
-                    <option value="CONDO">Condo</option>
-                    <option value="HOUSE">House</option>
+
+                <label for="editPropertyType">
+                    Property Type
+                </label>
+
+                <select
+                    id="editPropertyType"
+                    required
+                >
+
+                    <option value="">
+                        Select property type
+                    </option>
+
+                    <option value="ROOM">
+                        Room
+                    </option>
+
+                    <option value="APARTMENT">
+                        Apartment
+                    </option>
+
+                    <option value="CONDO">
+                        Condo
+                    </option>
+
+                    <option value="HOUSE">
+                        House
+                    </option>
+
                 </select>
 
-                <label for="editPropertyUnit">Unit / Block / Room</label>
+
+                <label for="editPropertyState">
+                    State
+                </label>
+
+                <select
+                    id="editPropertyState"
+                    required
+                >
+
+                    <option value="">
+                        Select state
+                    </option>
+
+                    <option value="Selangor">
+                        Selangor
+                    </option>
+
+                    <option value="Kuala Lumpur">
+                        Kuala Lumpur
+                    </option>
+
+                </select>
+
+
+                <label for="editPropertyCity">
+                    City
+                </label>
+
+                <select
+                    id="editPropertyCity"
+                    required
+                    disabled
+                >
+
+                    <option value="">
+                        Select city
+                    </option>
+
+                </select>
+
+
+                <label for="editPropertyUnit">
+                    Unit / Block / Room
+                </label>
+
                 <input
                     type="text"
                     id="editPropertyUnit"
                     required
                 >
 
-                <label for="editPropertyMap">Google Maps URL</label>
+
+                <label for="editPropertyMap">
+                    Google Maps URL
+                </label>
+
                 <input
                     type="url"
                     id="editPropertyMap"
                     required
                 >
 
-                <label for="editPropertyDescription">Description</label>
+                <label>
+                     Current Property Image
+                </label>
+
+                <div id="currentPropertyImage"></div>
+
+                <label for="editPropertyImage">
+                    Replace Property Image
+                </label>
+
+                <input
+                    type="file"
+                    id="editPropertyImage"
+                    accept="image/*"
+                >
+
+                <p>
+                  Leave this empty to keep the current property image.
+                </p>
+
+
+                <label for="editPropertyDescription">
+                    Description
+                </label>
+
                 <textarea
                     id="editPropertyDescription"
                     rows="5"
-                    required
                 ></textarea>
 
-                <label for="editPropertyRent">Monthly Rent (RM)</label>
+
+                <label for="editPropertyRent">
+                    Monthly Rent (RM)
+                </label>
+
                 <input
                     type="number"
                     id="editPropertyRent"
@@ -79,9 +203,20 @@
                     required
                 >
 
+
+                <p id="editPropertyMessage"></p>
+
+
                 <div class="form-actions">
-                    <a href="owner-dashboard.html">Cancel</a>
-                    <button type="submit">Save Changes</button>
+
+                    <a href="owner-dashboard.html">
+                        Cancel
+                    </a>
+
+                    <button type="submit">
+                        Save Changes
+                    </button>
+
                 </div>
 
             </form>
@@ -90,7 +225,9 @@
 
     </main>
 
+    <script src="js/welcome.js"></script>
     <script src="js/property.js"></script>
     <script src="js/logout.js"></script>
+
 </body>
 </html>

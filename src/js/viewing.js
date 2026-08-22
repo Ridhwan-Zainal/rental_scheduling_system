@@ -1,45 +1,122 @@
 // ========================================
-// GET PAGE ELEMENTS
+// PAGE ELEMENTS
 // ========================================
 
 const availabilityForm =
-    document.getElementById("availabilityForm");
+    document.getElementById(
+        "availabilityForm"
+    );
 
 const propertyNameDisplay =
-    document.getElementById("propertyNameDisplay");
+    document.getElementById(
+        "propertyNameDisplay"
+    );
 
 const viewDate =
-    document.getElementById("viewDate");
+    document.getElementById(
+        "viewDate"
+    );
 
 const message =
-    document.getElementById("availabilityMessage");
+    document.getElementById(
+        "availabilityMessage"
+    );
 
 
 // ========================================
-// GET SELECTED PROPERTY
+// SELECTED PROPERTY
 // ========================================
 
 const selectedPropertyID =
-    localStorage.getItem("selectedPropertyID");
-
-const properties =
-    JSON.parse(localStorage.getItem("properties")) || [];
-
-const selectedProperty = properties.find(
-    property =>
-        String(property.property_ID) ===
-        String(selectedPropertyID)
-);
+    sessionStorage.getItem(
+        "selectedPropertyID"
+    );
 
 
 // ========================================
-// DISPLAY PROPERTY NAME
+// LOAD PROPERTY NAME
 // ========================================
 
-if (propertyNameDisplay && selectedProperty) {
+async function loadPropertyName() {
 
-    propertyNameDisplay.textContent =
-        `Property: ${selectedProperty.property_Name}`;
+    if (
+        !propertyNameDisplay ||
+        !selectedPropertyID
+    ) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/properties/${selectedPropertyID}`
+            );
+
+
+        const property =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            propertyNameDisplay.textContent =
+                "Property unavailable.";
+
+            return;
+        }
+
+
+        propertyNameDisplay.textContent =
+            `Property: ${property.property_Name}`;
+
+    } catch (error) {
+
+        console.error(error);
+
+        propertyNameDisplay.textContent =
+            "Unable to load property.";
+    }
+}
+
+
+// ========================================
+// PREVENT PAST DATES
+// ========================================
+
+if (viewDate) {
+
+    const today =
+        new Date()
+            .toLocaleDateString(
+                "en-CA"
+            );
+
+    viewDate.min =
+        today;
+}
+
+
+// ========================================
+// CLEAR CHECKBOXES
+// ========================================
+
+function clearSlots() {
+
+    const checkboxes =
+        document.querySelectorAll(
+            'input[name="slot"]'
+        );
+
+
+    checkboxes.forEach(
+        function (checkbox) {
+
+            checkbox.checked =
+                false;
+        }
+    );
 }
 
 
@@ -47,122 +124,132 @@ if (propertyNameDisplay && selectedProperty) {
 // LOAD SAVED AVAILABILITY
 // ========================================
 
-function loadAvailability() {
+async function loadAvailability() {
 
-    if (!viewDate.value) {
+    if (
+        !viewDate ||
+        !viewDate.value ||
+        !selectedPropertyID
+    ) {
         return;
     }
 
 
-    // Clear all checkboxes first
+    clearSlots();
 
-    const checkboxes =
-        document.querySelectorAll(
-            'input[name="slot"]'
-        );
 
-    checkboxes.forEach(
-        function (checkbox) {
+    try {
 
-            checkbox.checked = false;
+        const response =
+            await fetch(
+                `/api/viewings?property_ID=${selectedPropertyID}&view_Date=${viewDate.value}`
+            );
+
+
+        const viewings =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            message.textContent =
+                viewings.message;
+
+            return;
         }
-    );
 
 
-    // Get saved viewing records
+        viewings.forEach(
+            function (viewing) {
 
-    const viewings =
-        JSON.parse(
-            localStorage.getItem("viewings")
-        ) || [];
-
-
-    // Find slots for this property and date
-
-    const savedSlots =
-        viewings.filter(
-            viewing =>
-                String(
-                    viewing.property_ID
-                ) ===
-                    String(
-                        selectedPropertyID
-                    )
-
-                &&
-
-                viewing.view_Date ===
-                    viewDate.value
-        );
+                const slotValue =
+                    `${viewing.view_Start_Time.substring(0, 5)}-${viewing.view_End_Time.substring(0, 5)}`;
 
 
-    // Check matching boxes
+                const checkbox =
+                    document.querySelector(
+                        `input[name="slot"][value="${slotValue}"]`
+                    );
 
-    savedSlots.forEach(
-        function (viewing) {
 
-            const slotValue =
-                `${viewing.view_Start_Time}-${viewing.view_End_Time}`;
+                if (checkbox) {
 
-            const checkbox =
-                document.querySelector(
-                    `input[name="slot"][value="${slotValue}"]`
-                );
+                    checkbox.checked =
+                        true;
 
-            if (checkbox) {
-                checkbox.checked = true;
+
+                    // If slot is already booked,
+                    // owner cannot remove it.
+                    if (
+                        viewing.view_Status ===
+                        "BOOKED"
+                    ) {
+
+                        checkbox.disabled =
+                            true;
+                    }
+                }
             }
-        }
-    );
+        );
 
+    } catch (error) {
 
-    message.textContent = "";
+        console.error(error);
+
+        message.textContent =
+            "Unable to load viewing availability.";
+    }
 }
 
 
 // ========================================
-// PREVENT PAST VIEWING DATES
+// DATE CHANGE
 // ========================================
 
 if (viewDate) {
 
-    const today =
-        new Date().toLocaleDateString("en-CA");
-
-    viewDate.min = today;
-
-
     viewDate.addEventListener(
         "change",
-        loadAvailability
+        function () {
+
+            // Clear old message when changing date
+            message.textContent = "";
+
+            const checkboxes =
+                document.querySelectorAll(
+                    'input[name="slot"]'
+                );
+
+
+            checkboxes.forEach(
+                function (checkbox) {
+
+                    checkbox.disabled =
+                        false;
+                }
+            );
+
+
+            loadAvailability();
+        }
     );
 }
 
 
 // ========================================
-// SAVE / UPDATE AVAILABILITY
+// SAVE AVAILABILITY
 // ========================================
 
 if (availabilityForm) {
 
     availabilityForm.addEventListener(
         "submit",
-        function (event) {
+        async function (event) {
 
             event.preventDefault();
 
 
-            const selectedDate =
-                viewDate.value;
-
-
-            const selectedSlots =
-                document.querySelectorAll(
-                    'input[name="slot"]:checked'
-                );
-
-
-            if (!selectedDate) {
+            if (!viewDate.value) {
 
                 message.textContent =
                     "Please select a viewing date.";
@@ -171,47 +258,15 @@ if (availabilityForm) {
             }
 
 
-            if (selectedSlots.length === 0) {
-
-                message.textContent =
-                    "Please select at least one viewing slot.";
-
-                return;
-            }
-
-
-            let viewings =
-                JSON.parse(
-                    localStorage.getItem("viewings")
-                ) || [];
-
-
-            // ========================================
-            // REMOVE OLD AVAILABILITY FOR THIS DATE
-            // ========================================
-
-            viewings =
-                viewings.filter(
-                    viewing =>
-                        !(
-                            String(
-                                viewing.property_ID
-                            ) ===
-                                String(
-                                    selectedPropertyID
-                                )
-
-                            &&
-
-                            viewing.view_Date ===
-                                selectedDate
-                        )
+            const selectedSlots =
+                document.querySelectorAll(
+                    'input[name="slot"]:checked:not(:disabled)'
                 );
 
 
-            // ========================================
-            // CREATE UPDATED AVAILABILITY
-            // ========================================
+            const slots =
+                [];
+
 
             selectedSlots.forEach(
                 function (slot) {
@@ -220,51 +275,81 @@ if (availabilityForm) {
                         startTime,
                         endTime
                     ] =
-                        slot.value.split("-");
+                        slot.value.split(
+                            "-"
+                        );
 
 
-                    const viewing = {
-
-                        view_ID:
-                            Date.now() +
-                            Math.random(),
-
-                        property_ID:
-                            selectedPropertyID,
-
-                        view_Date:
-                            selectedDate,
-
-                        view_Start_Time:
-                            startTime,
-
-                        view_End_Time:
-                            endTime,
-
-                        view_Status:
-                            "AVAILABLE"
-                    };
-
-
-                    viewings.push(
-                        viewing
-                    );
+                    slots.push({
+                        startTime,
+                        endTime
+                    });
                 }
             );
 
 
-            // ========================================
-            // SAVE
-            // ========================================
+            try {
 
-            localStorage.setItem(
-                "viewings",
-                JSON.stringify(viewings)
-            );
+                const response =
+                    await fetch(
+                        "/api/viewings",
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    property_ID:
+                                        selectedPropertyID,
+
+                                    view_Date:
+                                        viewDate.value,
+
+                                    slots:
+                                        slots
+                                })
+                        }
+                    );
 
 
-            message.textContent =
-                "Viewing availability updated successfully.";
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    message.textContent =
+                        data.message;
+
+                    return;
+                }
+
+
+                message.textContent =
+                    data.message;
+
+
+                loadAvailability();
+
+            } catch (error) {
+
+                console.error(error);
+
+                message.textContent =
+                    "Unable to save viewing availability.";
+            }
         }
     );
 }
+
+
+// ========================================
+// INITIAL LOAD
+// ========================================
+
+loadPropertyName();

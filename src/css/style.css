@@ -17,7 +17,6 @@ a {
     color: #333;
 }
 
-
 /* ========================================
    AUTHENTICATION
 ======================================== */
@@ -109,6 +108,10 @@ body:not(.dashboard-body) {
     text-decoration: underline;
 }
 
+.header-user {
+    margin-right: 20px;
+}
+
 
 /* ========================================
    DASHBOARD
@@ -169,6 +172,14 @@ body:not(.dashboard-body) {
     gap: 20px;
 }
 
+.property-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
 .property-card {
     padding: 22px;
 
@@ -197,6 +208,13 @@ body:not(.dashboard-body) {
     margin-top: 20px;
 }
 
+.edit-property-image {
+    width: 220px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
 
 /* ========================================
    RENTER FILTER
@@ -475,6 +493,37 @@ button:disabled {
 
 .booking-card a:hover {
     text-decoration: underline;
+}
+
+
+.booking-card-content {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+
+.booking-image-section {
+    flex-shrink: 0;
+}
+
+
+.booking-property-image {
+    width: 260px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+
+.booking-info-section {
+    flex: 1;
+}
+
+
+.booking-info-section p {
+    margin-top: 0;
+    margin-bottom: 12px;
 }
 
 

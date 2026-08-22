@@ -1,18 +1,11 @@
 // ========================================
-// STORAGE HELPERS
+// STORAGE / SESSION HELPERS
 // ========================================
 
-function getProperties() {
+function getCurrentUser() {
     return JSON.parse(
-        localStorage.getItem("properties")
-    ) || [];
-}
-
-
-function getViewings() {
-    return JSON.parse(
-        localStorage.getItem("viewings")
-    ) || [];
+        sessionStorage.getItem("currentUser")
+    );
 }
 
 
@@ -32,49 +25,65 @@ const propertyTypeFilter =
 
 
 // ========================================
+// LOAD AVAILABLE PROPERTIES FROM MYSQL
+// ========================================
+
+async function getAvailableProperties() {
+
+    const response =
+        await fetch(
+            "/api/renter/properties"
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+        throw new Error(
+            data.message ||
+            "Unable to retrieve properties."
+        );
+    }
+
+
+    return data;
+}
+
+
+// ========================================
 // DISPLAY PROPERTIES
 // ========================================
 
-function displayProperties(filterType = "ALL") {
+async function displayProperties(
+    filterType = "ALL"
+) {
 
     if (!renterPropertyList) {
         return;
     }
 
-    const properties = getProperties();
 
-    let availableProperties =
-        properties.filter(
-            property =>
-                property.property_Status ===
-                "AVAILABLE"
-        );
+    const currentUser =
+        getCurrentUser();
 
 
-    if (filterType !== "ALL") {
+    // ========================================
+    // CHECK LOGIN
+    // ========================================
 
-        availableProperties =
-            availableProperties.filter(
-                property =>
-                    property.property_Type ===
-                    filterType
-            );
-    }
-
-
-    if (availableProperties.length === 0) {
+    if (!currentUser) {
 
         renterPropertyList.innerHTML = `
-
             <div class="empty-state">
 
                 <h3>
-                    No properties available
+                    Not logged in
                 </h3>
 
                 <p>
-                    There are currently no properties
-                    matching your selection.
+                    Please log in to browse properties.
                 </p>
 
             </div>
@@ -84,62 +93,202 @@ function displayProperties(filterType = "ALL") {
     }
 
 
-    renterPropertyList.innerHTML = "";
+    // ========================================
+    // CHECK ROLE
+    // ========================================
 
+    if (
+        currentUser.user_Role !==
+        "RENTER"
+    ) {
 
-    availableProperties.forEach(
-        function (property) {
-
-            const card =
-                document.createElement("div");
-
-            card.classList.add(
-                "property-card"
-            );
-
-
-            card.innerHTML = `
+        renterPropertyList.innerHTML = `
+            <div class="empty-state">
 
                 <h3>
-                    ${property.property_Name}
+                    Access denied
                 </h3>
 
                 <p>
-                    <strong>
-                        Property Type:
-                    </strong>
-
-                    ${property.property_Type}
+                    This page is only available
+                    to renters.
                 </p>
 
-                <p>
-                    <strong>
-                        Monthly Rent:
-                    </strong>
+            </div>
+        `;
 
-                    RM ${property.property_Rent}
-                </p>
+        return;
+    }
 
-                <p>
-                    ${property.property_Description}
-                </p>
 
-                <button
-                    type="button"
-                    onclick="viewProperty(
-                        '${property.property_ID}'
-                    )"
-                >
-                    View Property
-                </button>
+    try {
+
+        let properties =
+            await getAvailableProperties();
+
+
+        // ========================================
+        // PROPERTY TYPE FILTER
+        // ========================================
+
+        if (
+            filterType !==
+            "ALL"
+        ) {
+
+            properties =
+                properties.filter(
+                    property =>
+                        property.property_Type ===
+                        filterType
+                );
+        }
+
+
+        // ========================================
+        // EMPTY STATE
+        // ========================================
+
+        if (
+            properties.length === 0
+        ) {
+
+            renterPropertyList.innerHTML = `
+                <div class="empty-state">
+
+                    <h3>
+                        No properties available
+                    </h3>
+
+                    <p>
+                        There are currently no
+                        properties matching
+                        your selection.
+                    </p>
+
+                </div>
             `;
 
-
-            renterPropertyList.appendChild(
-                card
-            );
+            return;
         }
-    );
+
+
+        // ========================================
+        // PROPERTY CARDS
+        // ========================================
+
+        renterPropertyList.innerHTML =
+            "";
+
+
+        properties.forEach(
+            function (property) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.classList.add(
+                    "property-card"
+                );
+
+
+                card.innerHTML = `
+
+                    <h3>
+                        ${property.property_Name}
+                    </h3>
+
+
+                      ${
+                      property.property_Image_URL
+                          ? `
+                     <img
+                       src="${property.property_Image_URL}"
+                     alt="${property.property_Name}"
+                     class="property-image"
+                         >
+                         `
+                         : ""
+                    }
+
+                    <p>
+                        <strong>
+                            Property Type:
+                        </strong>
+
+                        ${property.property_Type}
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Location:
+                        </strong>
+
+                        ${property.property_City},
+                        ${property.property_State}
+                    </p>
+
+
+                    <p>
+                        <strong>
+                            Monthly Rent:
+                        </strong>
+
+                        RM ${property.property_Rent}
+                        / month
+                    </p>
+
+
+                    <p>
+                        ${
+                            property.property_Description ||
+                            ""
+                        }
+                    </p>
+
+
+                    <button
+                        type="button"
+                        onclick="viewProperty(
+                            '${property.property_ID}'
+                        )"
+                    >
+                        View Property
+                    </button>
+                `;
+
+
+                renterPropertyList.appendChild(
+                    card
+                );
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        renterPropertyList.innerHTML = `
+            <div class="empty-state">
+
+                <h3>
+                    Unable to load properties
+                </h3>
+
+                <p>
+                    Unable to connect to the server.
+                </p>
+
+            </div>
+        `;
+    }
 }
 
 
@@ -147,12 +296,15 @@ function displayProperties(filterType = "ALL") {
 // VIEW PROPERTY
 // ========================================
 
-function viewProperty(propertyID) {
+function viewProperty(
+    propertyID
+) {
 
-    localStorage.setItem(
+    sessionStorage.setItem(
         "selectedRenterPropertyID",
         propertyID
     );
+
 
     window.location.href =
         "property-details.html";
@@ -178,7 +330,7 @@ if (propertyTypeFilter) {
 
 
 // ========================================
-// PROPERTY DETAILS PAGE
+// PROPERTY DETAILS ELEMENTS
 // ========================================
 
 const propertyName =
@@ -212,45 +364,6 @@ const availableSlots =
     );
 
 
-if (propertyName) {
-
-    const selectedPropertyID =
-        localStorage.getItem(
-            "selectedRenterPropertyID"
-        );
-
-    const properties =
-        getProperties();
-
-    const selectedProperty =
-        properties.find(
-            property =>
-                String(
-                    property.property_ID
-                ) ===
-                String(
-                    selectedPropertyID
-                )
-        );
-
-
-    if (selectedProperty) {
-
-        propertyName.textContent =
-            selectedProperty.property_Name;
-
-        propertyType.textContent =
-            selectedProperty.property_Type;
-
-        propertyRent.textContent =
-            `RM ${selectedProperty.property_Rent} / month`;
-
-        propertyDescription.textContent =
-            selectedProperty.property_Description;
-    }
-}
-
-
 // ========================================
 // PREVENT PAST VIEWING DATES
 // ========================================
@@ -258,17 +371,111 @@ if (propertyName) {
 if (renterViewDate) {
 
     const today =
-        new Date().toLocaleDateString("en-CA");
+        new Date()
+            .toLocaleDateString(
+                "en-CA"
+            );
 
-    renterViewDate.min = today;
+
+    renterViewDate.min =
+        today;
 }
 
 
 // ========================================
-// DISPLAY AVAILABLE SLOTS
+// LOAD PROPERTY DETAILS
 // ========================================
 
-function displayAvailableSlots() {
+async function loadPropertyDetails() {
+
+    if (!propertyName) {
+        return;
+    }
+
+
+    const propertyID =
+        sessionStorage.getItem(
+            "selectedRenterPropertyID"
+        );
+
+
+    if (!propertyID) {
+
+        propertyName.textContent =
+            "Property not selected.";
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/properties/${propertyID}`
+            );
+
+
+        const property =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            propertyName.textContent =
+                property.message;
+
+            return;
+        }
+
+
+        propertyName.textContent =
+            property.property_Name;
+
+
+        propertyType.textContent =
+            `${property.property_Type} • ${property.property_City}, ${property.property_State}`;
+
+
+        propertyRent.textContent =
+            `RM ${property.property_Rent} / month`;
+
+
+        propertyDescription.textContent =
+            property.property_Description ||
+            "";
+
+
+        /*
+            IMPORTANT:
+
+            We deliberately do NOT display:
+
+            property.property_Unit
+            property.property_GMap_URL
+
+            Those remain hidden until
+            a booking is confirmed.
+        */
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        propertyName.textContent =
+            "Unable to load property.";
+    }
+}
+
+
+// ========================================
+// LOAD AVAILABLE VIEWING SLOTS
+// ========================================
+
+async function displayAvailableSlots() {
 
     if (
         !renterViewDate ||
@@ -295,85 +502,141 @@ function displayAvailableSlots() {
     }
 
 
-    const selectedPropertyID =
-        localStorage.getItem(
+    const propertyID =
+        sessionStorage.getItem(
             "selectedRenterPropertyID"
         );
 
 
-    const viewings =
-        getViewings();
-
-
-    const matchingSlots =
-        viewings.filter(
-            viewing =>
-
-                String(
-                    viewing.property_ID
-                ) ===
-                    String(
-                        selectedPropertyID
-                    )
-
-                &&
-
-                viewing.view_Date ===
-                    selectedDate
-
-                &&
-
-                viewing.view_Status ===
-                    "AVAILABLE"
-        );
-
-
-    if (matchingSlots.length === 0) {
-
-        availableSlots.innerHTML = `
-            <p>
-                No viewing slots are
-                available on this date.
-            </p>
-        `;
-
+    if (!propertyID) {
         return;
     }
 
 
-    availableSlots.innerHTML = "";
+    try {
+
+        const response =
+            await fetch(
+                `/api/viewings?property_ID=${propertyID}&view_Date=${selectedDate}`
+            );
 
 
-    matchingSlots.forEach(
-        function (viewing) {
+        const viewings =
+            await response.json();
 
-            const button =
-                document.createElement(
-                    "button"
+
+        if (!response.ok) {
+
+            availableSlots.innerHTML = `
+                <p>
+                    ${viewings.message}
+                </p>
+            `;
+
+            return;
+        }
+
+
+        const availableViewings =
+            viewings.filter(
+                viewing =>
+                    viewing.view_Status ===
+                    "AVAILABLE"
+            );
+
+
+        // ========================================
+        // NO AVAILABLE SLOTS
+        // ========================================
+
+        if (
+            availableViewings.length === 0
+        ) {
+
+            availableSlots.innerHTML = `
+                <p>
+                    No viewing slots are
+                    available on this date.
+                </p>
+            `;
+
+            return;
+        }
+
+
+        // ========================================
+        // DISPLAY SLOT BUTTONS
+        // ========================================
+
+        availableSlots.innerHTML =
+            "";
+
+
+        availableViewings.forEach(
+            function (viewing) {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                const startTime =
+                    viewing
+                        .view_Start_Time
+                        .substring(
+                            0,
+                            5
+                        );
+
+
+                const endTime =
+                    viewing
+                        .view_End_Time
+                        .substring(
+                            0,
+                            5
+                        );
+
+
+                button.textContent =
+                    `${startTime} - ${endTime}`;
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        selectViewing(
+                            viewing.view_ID
+                        );
+                    }
                 );
 
-            button.type = "button";
 
-            button.textContent =
-                `${viewing.view_Start_Time} - ${viewing.view_End_Time}`;
+                availableSlots.appendChild(
+                    button
+                );
+            }
+        );
 
+    } catch (error) {
 
-            button.addEventListener(
-                "click",
-                function () {
-
-                    selectViewing(
-                        viewing.view_ID
-                    );
-                }
-            );
+        console.error(
+            error
+        );
 
 
-            availableSlots.appendChild(
-                button
-            );
-        }
-    );
+        availableSlots.innerHTML = `
+            <p>
+                Unable to load viewing slots.
+            </p>
+        `;
+    }
 }
 
 
@@ -394,12 +657,15 @@ if (renterViewDate) {
 // SELECT VIEWING SLOT
 // ========================================
 
-function selectViewing(viewID) {
+function selectViewing(
+    viewID
+) {
 
-    localStorage.setItem(
+    sessionStorage.setItem(
         "selectedViewingID",
         viewID
     );
+
 
     window.location.href =
         "booking-confirmation.html";
@@ -407,7 +673,9 @@ function selectViewing(viewID) {
 
 
 // ========================================
-// INITIAL RENTER HOME LOAD
+// INITIAL LOADS
 // ========================================
 
 displayProperties();
+
+loadPropertyDetails();
