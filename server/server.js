@@ -1071,6 +1071,10 @@ app.post(
         } = req.body;
 
 
+        // ========================================
+        // BASIC VALIDATION
+        // ========================================
+
         if (
             !property_ID ||
             !view_Date ||
@@ -1087,26 +1091,26 @@ app.post(
 
 
         // ========================================
-        // REMOVE OLD AVAILABLE SLOTS
+        // GET PROPERTY OWNER
         // ========================================
 
-        const deleteSQL = `
-            DELETE FROM VIEWING
-            WHERE
-                property_ID = ?
-                AND view_Date = ?
-                AND view_Status = 'AVAILABLE'
+        const propertySQL = `
+            SELECT
+                property_ID,
+                user_ID
+            FROM PROPERTY
+            WHERE property_ID = ?
         `;
 
 
         db.query(
-            deleteSQL,
-            [
-                property_ID,
-                view_Date
-            ],
+            propertySQL,
+            [property_ID],
 
-            function (error) {
+            function (
+                error,
+                propertyResults
+            ) {
 
                 if (error) {
 
@@ -1116,63 +1120,72 @@ app.post(
                         .status(500)
                         .json({
                             message:
-                                "Unable to update viewing availability."
+                                "Unable to verify property owner."
                         });
                 }
 
 
-                // ========================================
-                // NO SLOTS SELECTED
-                // ========================================
-
                 if (
-                    slots.length === 0
+                    propertyResults.length === 0
                 ) {
 
-                    return res.json({
-                        message:
-                            "Viewing availability updated successfully."
-                    });
+                    return res
+                        .status(404)
+                        .json({
+                            message:
+                                "Property not found."
+                        });
                 }
 
 
+                const owner_ID =
+                    propertyResults[0].user_ID;
+
+
                 // ========================================
-                // INSERT SELECTED SLOTS
+                // CHECK OWNER SLOT CONFLICTS
                 // ========================================
 
-                const values =
-                    slots.map(
-                        function (slot) {
+                const conflictSQL = `
+                    SELECT
+                        VIEWING.view_ID,
+                        VIEWING.view_Start_Time,
+                        VIEWING.view_End_Time,
+                        PROPERTY.property_Name
 
-                            return [
-                                property_ID,
-                                view_Date,
-                                slot.startTime,
-                                slot.endTime,
-                                "AVAILABLE"
-                            ];
-                        }
-                    );
+                    FROM VIEWING
 
+                    INNER JOIN PROPERTY
+                        ON VIEWING.property_ID =
+                           PROPERTY.property_ID
 
-                const insertSQL = `
-                    INSERT INTO VIEWING
-                    (
-                        property_ID,
-                        view_Date,
-                        view_Start_Time,
-                        view_End_Time,
-                        view_Status
-                    )
-                    VALUES ?
+                    WHERE
+                        PROPERTY.user_ID = ?
+
+                        AND VIEWING.view_Date = ?
+
+                        AND VIEWING.property_ID <> ?
+
+                        AND VIEWING.view_Status IN (
+                            'AVAILABLE',
+                            'BOOKED'
+                        )
                 `;
 
 
                 db.query(
-                    insertSQL,
-                    [values],
+                    conflictSQL,
 
-                    function (error) {
+                    [
+                        owner_ID,
+                        view_Date,
+                        property_ID
+                    ],
+
+                    function (
+                        error,
+                        existingSlots
+                    ) {
 
                         if (error) {
 
@@ -1182,15 +1195,183 @@ app.post(
                                 .status(500)
                                 .json({
                                     message:
-                                        "Unable to save viewing slots."
+                                        "Unable to check viewing schedule conflicts."
                                 });
                         }
 
 
-                        res.json({
-                            message:
-                                "Viewing availability updated successfully."
-                        });
+                        // ========================================
+                        // FIND SAME PREDEFINED SLOT
+                        // ========================================
+
+                        const conflictingSlot =
+                            slots.find(
+                                function (newSlot) {
+
+                                    return existingSlots.some(
+                                        function (
+                                            existingSlot
+                                        ) {
+
+                                            const existingStart =
+                                                existingSlot
+                                                    .view_Start_Time
+                                                    .substring(
+                                                        0,
+                                                        5
+                                                    );
+
+
+                                            const existingEnd =
+                                                existingSlot
+                                                    .view_End_Time
+                                                    .substring(
+                                                        0,
+                                                        5
+                                                    );
+
+
+                                            return (
+                                                existingStart ===
+                                                    newSlot.startTime &&
+                                                existingEnd ===
+                                                    newSlot.endTime
+                                            );
+                                        }
+                                    );
+                                }
+                            );
+
+
+                        // ========================================
+                        // OWNER HAS CONFLICT
+                        // ========================================
+
+                        if (conflictingSlot) {
+
+                            return res
+                                .status(409)
+                                .json({
+                                    message:
+                                        "You already have another property viewing scheduled for this time slot."
+                                });
+                        }
+
+
+                        // ========================================
+                        // REMOVE OLD AVAILABLE SLOTS
+                        // ========================================
+
+                        const deleteSQL = `
+                            DELETE FROM VIEWING
+                            WHERE
+                                property_ID = ?
+                                AND view_Date = ?
+                                AND view_Status = 'AVAILABLE'
+                        `;
+
+
+                        db.query(
+                            deleteSQL,
+
+                            [
+                                property_ID,
+                                view_Date
+                            ],
+
+                            function (error) {
+
+                                if (error) {
+
+                                    console.error(
+                                        error
+                                    );
+
+                                    return res
+                                        .status(500)
+                                        .json({
+                                            message:
+                                                "Unable to update viewing availability."
+                                        });
+                                }
+
+
+                                // ========================================
+                                // NO SLOTS SELECTED
+                                // ========================================
+
+                                if (
+                                    slots.length === 0
+                                ) {
+
+                                    return res.json({
+                                        message:
+                                            "Viewing availability updated successfully."
+                                    });
+                                }
+
+
+                                // ========================================
+                                // INSERT SELECTED SLOTS
+                                // ========================================
+
+                                const values =
+                                    slots.map(
+                                        function (slot) {
+
+                                            return [
+                                                property_ID,
+                                                view_Date,
+                                                slot.startTime,
+                                                slot.endTime,
+                                                "AVAILABLE"
+                                            ];
+                                        }
+                                    );
+
+
+                                const insertSQL = `
+                                    INSERT INTO VIEWING
+                                    (
+                                        property_ID,
+                                        view_Date,
+                                        view_Start_Time,
+                                        view_End_Time,
+                                        view_Status
+                                    )
+                                    VALUES ?
+                                `;
+
+
+                                db.query(
+                                    insertSQL,
+                                    [values],
+
+                                    function (error) {
+
+                                        if (error) {
+
+                                            console.error(
+                                                error
+                                            );
+
+                                            return res
+                                                .status(500)
+                                                .json({
+                                                    message:
+                                                        "Unable to save viewing slots."
+                                                });
+                                        }
+
+
+                                        res.json({
+                                            message:
+                                                "Viewing availability updated successfully."
+                                        });
+                                    }
+                                );
+                            }
+                        );
                     }
                 );
             }
@@ -1329,7 +1510,7 @@ app.post(
 
 
                         // ========================================
-                        // CHECK VIEWING SLOT
+                        // CHECK SELECTED VIEWING SLOT
                         // ========================================
 
                         const viewingSQL = `
@@ -1360,7 +1541,8 @@ app.post(
 
 
                                 if (
-                                    viewingResults.length === 0
+                                    viewingResults.length ===
+                                    0
                                 ) {
 
                                     return rollbackBooking(
@@ -1391,32 +1573,48 @@ app.post(
 
 
                                 // ========================================
-                                // CREATE BOOKING
+                                // CHECK RENTER SCHEDULE CONFLICT
                                 // ========================================
 
-                                const bookingSQL = `
-                                    INSERT INTO BOOKING
-                                    (
-                                        view_ID,
-                                        user_ID,
-                                        booking_Status
-                                    )
-                                    VALUES (?, ?, ?)
+                                const conflictSQL = `
+                                    SELECT
+                                        BOOKING.booking_ID
+
+                                    FROM BOOKING
+
+                                    INNER JOIN VIEWING
+                                        ON BOOKING.view_ID =
+                                           VIEWING.view_ID
+
+                                    WHERE
+                                        BOOKING.user_ID = ?
+
+                                        AND BOOKING.booking_Status =
+                                            'CONFIRMED'
+
+                                        AND VIEWING.view_Date = ?
+
+                                        AND VIEWING.view_Start_Time = ?
+
+                                        AND VIEWING.view_End_Time = ?
+
+                                    LIMIT 1
                                 `;
 
 
                                 db.query(
-                                    bookingSQL,
+                                    conflictSQL,
 
                                     [
-                                        view_ID,
                                         user_ID,
-                                        "CONFIRMED"
+                                        viewing.view_Date,
+                                        viewing.view_Start_Time,
+                                        viewing.view_End_Time
                                     ],
 
                                     function (
                                         error,
-                                        bookingResult
+                                        conflictResults
                                     ) {
 
                                         if (error) {
@@ -1424,31 +1622,56 @@ app.post(
                                             return rollbackBooking(
                                                 res,
                                                 error,
-                                                "Unable to create booking."
+                                                "Unable to check renter schedule."
                                             );
                                         }
 
 
                                         // ========================================
-                                        // MARK SLOT BOOKED
+                                        // RENTER HAS CONFLICT
                                         // ========================================
 
-                                        const updateViewingSQL = `
-                                            UPDATE VIEWING
-                                            SET view_Status = 'BOOKED'
-                                            WHERE
-                                                view_ID = ?
-                                                AND view_Status = 'AVAILABLE'
+                                        if (
+                                            conflictResults.length >
+                                            0
+                                        ) {
+
+                                            return rollbackBooking(
+                                                res,
+                                                null,
+                                                "You already have another viewing booked for this time slot.",
+                                                409
+                                            );
+                                        }
+
+
+                                        // ========================================
+                                        // CREATE BOOKING
+                                        // ========================================
+
+                                        const bookingSQL = `
+                                            INSERT INTO BOOKING
+                                            (
+                                                view_ID,
+                                                user_ID,
+                                                booking_Status
+                                            )
+                                            VALUES (?, ?, ?)
                                         `;
 
 
                                         db.query(
-                                            updateViewingSQL,
-                                            [view_ID],
+                                            bookingSQL,
+
+                                            [
+                                                view_ID,
+                                                user_ID,
+                                                "CONFIRMED"
+                                            ],
 
                                             function (
                                                 error,
-                                                updateResult
+                                                bookingResult
                                             ) {
 
                                                 if (error) {
@@ -1456,51 +1679,96 @@ app.post(
                                                     return rollbackBooking(
                                                         res,
                                                         error,
-                                                        "Unable to update viewing slot."
-                                                    );
-                                                }
-
-
-                                                if (
-                                                    updateResult.affectedRows !== 1
-                                                ) {
-
-                                                    return rollbackBooking(
-                                                        res,
-                                                        null,
-                                                        "Viewing slot could not be booked.",
-                                                        409
+                                                        "Unable to create booking."
                                                     );
                                                 }
 
 
                                                 // ========================================
-                                                // COMMIT TRANSACTION
+                                                // MARK SLOT BOOKED
                                                 // ========================================
 
-                                                db.commit(
-                                                    function (error) {
+                                                const updateViewingSQL = `
+                                                    UPDATE VIEWING
+                                                    SET
+                                                        view_Status =
+                                                            'BOOKED'
+                                                    WHERE
+                                                        view_ID = ?
+                                                        AND view_Status =
+                                                            'AVAILABLE'
+                                                `;
+
+
+                                                db.query(
+                                                    updateViewingSQL,
+                                                    [view_ID],
+
+                                                    function (
+                                                        error,
+                                                        updateResult
+                                                    ) {
 
                                                         if (error) {
 
                                                             return rollbackBooking(
                                                                 res,
                                                                 error,
-                                                                "Unable to complete booking."
+                                                                "Unable to update viewing slot."
                                                             );
                                                         }
 
 
-                                                        res
-                                                            .status(201)
-                                                            .json({
+                                                        if (
+                                                            updateResult
+                                                                .affectedRows !==
+                                                            1
+                                                        ) {
 
-                                                                message:
-                                                                    "Booking confirmed successfully.",
+                                                            return rollbackBooking(
+                                                                res,
+                                                                null,
+                                                                "Viewing slot could not be booked.",
+                                                                409
+                                                            );
+                                                        }
 
-                                                                booking_ID:
-                                                                    bookingResult.insertId
-                                                            });
+
+                                                        // ========================================
+                                                        // COMMIT TRANSACTION
+                                                        // ========================================
+
+                                                        db.commit(
+                                                            function (
+                                                                error
+                                                            ) {
+
+                                                                if (
+                                                                    error
+                                                                ) {
+
+                                                                    return rollbackBooking(
+                                                                        res,
+                                                                        error,
+                                                                        "Unable to complete booking."
+                                                                    );
+                                                                }
+
+
+                                                                res
+                                                                    .status(
+                                                                        201
+                                                                    )
+                                                                    .json({
+
+                                                                        message:
+                                                                            "Booking confirmed successfully.",
+
+                                                                        booking_ID:
+                                                                            bookingResult.insertId
+                                                                    });
+                                                            }
+                                                        );
                                                     }
                                                 );
                                             }
@@ -2287,6 +2555,255 @@ app.put(
                 );
             }
         );
+    }
+);
+
+// ========================================
+// GET NEXT UPCOMING VIEWING
+// ========================================
+
+app.get(
+    "/api/upcoming-viewing",
+    function (req, res) {
+
+        const user_ID =
+            req.query.user_ID;
+
+        const user_Role =
+            req.query.user_Role;
+
+
+        // ========================================
+        // BASIC VALIDATION
+        // ========================================
+
+        if (
+            !user_ID ||
+            !user_Role
+        ) {
+
+            return res
+                .status(400)
+                .json({
+                    message:
+                        "User ID and role are required."
+                });
+        }
+
+
+        // ========================================
+        // RENTER UPCOMING VIEWING
+        // ========================================
+
+        if (
+            user_Role ===
+            "RENTER"
+        ) {
+
+            const sql = `
+                SELECT
+                    BOOKING.booking_ID,
+
+                    VIEWING.view_Date,
+                    VIEWING.view_Start_Time,
+                    VIEWING.view_End_Time,
+
+                    PROPERTY.property_ID,
+                    PROPERTY.property_Name,
+                    PROPERTY.property_City,
+                    PROPERTY.property_State,
+                    PROPERTY.property_Image_URL
+
+                FROM BOOKING
+
+                INNER JOIN VIEWING
+                    ON BOOKING.view_ID =
+                       VIEWING.view_ID
+
+                INNER JOIN PROPERTY
+                    ON VIEWING.property_ID =
+                       PROPERTY.property_ID
+
+                WHERE
+                    BOOKING.user_ID = ?
+                    AND BOOKING.booking_Status =
+                        'CONFIRMED'
+
+                    AND TIMESTAMP(
+                        VIEWING.view_Date,
+                        VIEWING.view_Start_Time
+                    ) > NOW()
+
+                ORDER BY
+                    VIEWING.view_Date ASC,
+                    VIEWING.view_Start_Time ASC
+
+                LIMIT 1
+            `;
+
+
+            db.query(
+                sql,
+                [user_ID],
+
+                function (
+                    error,
+                    results
+                ) {
+
+                    if (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        return res
+                            .status(500)
+                            .json({
+                                message:
+                                    "Unable to retrieve upcoming viewing."
+                            });
+                    }
+
+
+                    if (
+                        results.length === 0
+                    ) {
+
+                        return res.json(
+                            null
+                        );
+                    }
+
+
+                    res.json(
+                        results[0]
+                    );
+                }
+            );
+
+
+            return;
+        }
+
+
+        // ========================================
+        // OWNER UPCOMING VIEWING
+        // ========================================
+
+        if (
+            user_Role ===
+            "OWNER"
+        ) {
+
+            const sql = `
+                SELECT
+                    BOOKING.booking_ID,
+
+                    USERS.user_ID
+                        AS renter_ID,
+
+                    USERS.user_Name
+                        AS renter_Name,
+
+                    VIEWING.view_Date,
+                    VIEWING.view_Start_Time,
+                    VIEWING.view_End_Time,
+
+                    PROPERTY.property_ID,
+                    PROPERTY.property_Name,
+                    PROPERTY.property_City,
+                    PROPERTY.property_State,
+                    PROPERTY.property_Image_URL
+
+                FROM BOOKING
+
+                INNER JOIN USERS
+                    ON BOOKING.user_ID =
+                       USERS.user_ID
+
+                INNER JOIN VIEWING
+                    ON BOOKING.view_ID =
+                       VIEWING.view_ID
+
+                INNER JOIN PROPERTY
+                    ON VIEWING.property_ID =
+                       PROPERTY.property_ID
+
+                WHERE
+                    PROPERTY.user_ID = ?
+
+                    AND BOOKING.booking_Status =
+                        'CONFIRMED'
+
+                    AND TIMESTAMP(
+                        VIEWING.view_Date,
+                        VIEWING.view_Start_Time
+                    ) > NOW()
+
+                ORDER BY
+                    VIEWING.view_Date ASC,
+                    VIEWING.view_Start_Time ASC
+
+                LIMIT 1
+            `;
+
+
+            db.query(
+                sql,
+                [user_ID],
+
+                function (
+                    error,
+                    results
+                ) {
+
+                    if (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        return res
+                            .status(500)
+                            .json({
+                                message:
+                                    "Unable to retrieve upcoming viewing."
+                            });
+                    }
+
+
+                    if (
+                        results.length === 0
+                    ) {
+
+                        return res.json(
+                            null
+                        );
+                    }
+
+
+                    res.json(
+                        results[0]
+                    );
+                }
+            );
+
+
+            return;
+        }
+
+
+        // ========================================
+        // INVALID ROLE
+        // ========================================
+
+        return res
+            .status(400)
+            .json({
+                message:
+                    "Invalid user role."
+            });
     }
 );
 

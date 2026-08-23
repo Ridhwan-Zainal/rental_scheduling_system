@@ -13,12 +13,18 @@ function getCurrentUser() {
 
 
 // ========================================
-// PAGE ELEMENT
+// PAGE ELEMENTS
 // ========================================
 
 const ownerBookingList =
     document.getElementById(
         "ownerBookingList"
+    );
+
+
+const upcomingBooking =
+    document.getElementById(
+        "upcomingBooking"
     );
 
 
@@ -30,9 +36,16 @@ function formatDate(
     dateValue
 ) {
 
+    const dateString =
+        dateValue.substring(
+            0,
+            10
+        );
+
+
     const date =
         new Date(
-            `${dateValue}T00:00:00`
+            `${dateString}T00:00:00`
         );
 
 
@@ -238,83 +251,112 @@ async function displayOwnerBookings() {
                     `;
                 }
 
-            card.innerHTML = `
 
-                                <h3>
-                                  ${booking.property_Name}
-                                 </h3>
+                card.innerHTML = `
 
-                <div class="booking-card-content">
-
-                         <div class="booking-image-section">
-
-                                 ${
-                                 booking.property_Image_URL
-                                 ? `
-                                 <img
-                                    src="${booking.property_Image_URL}"
-                                    alt="${booking.property_Name}"
-                                    class="booking-property-image"
-                                    >
-                                     `
-                                  : ""
-                                 }
-
-                         </div>
+                    <h3>
+                        ${booking.property_Name}
+                    </h3>
 
 
-                         <div class="booking-info-section">
+                    <div class="booking-card-content">
 
-                             <p>
-                                <strong>Renter:</strong>
-                                 ${booking.renter_Name}
-                            </p>
 
-                             <p>
-                                <strong>Renter Email:</strong>
-                                 ${booking.renter_Email}
-                             </p>
+                        <div class="booking-image-section">
+
+                            ${
+                                booking.property_Image_URL
+                                    ? `
+                                        <img
+                                            src="${booking.property_Image_URL}"
+                                            alt="${booking.property_Name}"
+                                            class="booking-property-image"
+                                        >
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <div class="booking-info-section">
 
                             <p>
-                                 <strong>Viewing Date:</strong>
-                                  ${formatDate(
-                                 booking.view_Date
-                             )}
-                             </p>
+                                <strong>
+                                    Renter:
+                                </strong>
 
-                            <p>
-                                 <strong>Viewing Time:</strong>
-                                 ${startTime} - ${endTime}
-                             </p>
-
-                             <p>
-                                 <strong>Booking Status:</strong>
-                                 ${booking.booking_Status}
+                                ${booking.renter_Name}
                             </p>
 
-                             <p>
-                                 <strong>Property Location:</strong>
-                                 ${booking.property_City},
+
+                            <p>
+                                <strong>
+                                    Renter Email:
+                                </strong>
+
+                                ${booking.renter_Email}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    Viewing Date:
+                                </strong>
+
+                                ${formatDate(
+                                    booking.view_Date
+                                )}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    Viewing Time:
+                                </strong>
+
+                                ${startTime} - ${endTime}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    Booking Status:
+                                </strong>
+
+                                ${booking.booking_Status}
+                            </p>
+
+
+                            <p>
+                                <strong>
+                                    Property Location:
+                                </strong>
+
+                                ${booking.property_City},
                                 ${booking.property_State}
                             </p>
 
+
                             <p>
-                                 <strong>Unit / Block / Room:</strong>
+                                <strong>
+                                    Unit / Block / Room:
+                                </strong>
+
                                 ${booking.property_Unit}
-                             </p>
+                            </p>
 
 
-                        <div class="booking-actions">
+                            <div class="booking-actions">
 
-                              ${actionSection}
+                                ${actionSection}
 
-                         </div>
+                            </div>
 
-                         </div>
+                        </div>
 
-                </div>
+                    </div>
                 `;
-             
 
 
                 ownerBookingList.appendChild(
@@ -325,7 +367,9 @@ async function displayOwnerBookings() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
 
         ownerBookingList.innerHTML = `
@@ -406,9 +450,13 @@ async function updateBookingStatus(
 
         displayOwnerBookings();
 
+
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
+
 
         alert(
             "Unable to update booking."
@@ -418,7 +466,247 @@ async function updateBookingStatus(
 
 
 // ========================================
-// INITIAL LOAD
+// DISPLAY UPCOMING OWNER BOOKING
+// ========================================
+
+async function displayUpcomingOwnerBooking() {
+
+    if (!upcomingBooking) {
+        return;
+    }
+
+
+    const currentUser =
+        getCurrentUser();
+
+
+    if (!currentUser) {
+        return;
+    }
+
+
+    if (
+        currentUser.user_Role !==
+        "OWNER"
+    ) {
+
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/upcoming-viewing?user_ID=${currentUser.user_ID}&user_Role=OWNER`
+            );
+
+
+        const booking =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                booking.message ||
+                "Unable to load upcoming booking."
+            );
+        }
+
+
+        // ========================================
+        // NO UPCOMING BOOKING
+        // ========================================
+
+        if (!booking) {
+
+            upcomingBooking.innerHTML = `
+                <div class="empty-state">
+
+                    <h3>
+                        No upcoming viewing
+                    </h3>
+
+                    <p>
+                        You currently have no
+                        upcoming viewing appointments.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // ========================================
+        // FORMAT TIME
+        // ========================================
+
+        const startTime =
+            booking
+                .view_Start_Time
+                .substring(
+                    0,
+                    5
+                );
+
+
+        const endTime =
+            booking
+                .view_End_Time
+                .substring(
+                    0,
+                    5
+                );
+
+
+        // ========================================
+        // DISPLAY UPCOMING BOOKING
+        // ========================================
+
+        upcomingBooking.innerHTML = `
+
+            <div class="booking-card">
+
+                <h3>
+                    ${booking.property_Name}
+                </h3>
+
+
+                <div class="booking-card-content">
+
+
+                    <div class="booking-image-section">
+
+                        ${
+                            booking.property_Image_URL
+                                ? `
+                                    <img
+                                        src="${booking.property_Image_URL}"
+                                        alt="${booking.property_Name}"
+                                        class="booking-property-image"
+                                    >
+                                `
+                                : ""
+                        }
+
+                    </div>
+
+
+                    <div class="booking-info-section">
+
+                        <p>
+                            <strong>
+                                Renter:
+                            </strong>
+
+                            ${booking.renter_Name}
+                        </p>
+
+
+                        <p>
+                            <strong>
+                                Viewing Date:
+                            </strong>
+
+                            ${formatDate(
+                                booking.view_Date
+                            )}
+                        </p>
+
+
+                        <p>
+                            <strong>
+                                Viewing Time:
+                            </strong>
+
+                            ${startTime} - ${endTime}
+                        </p>
+
+
+                        <p>
+                            <strong>
+                                Property Location:
+                            </strong>
+
+                            ${booking.property_City},
+                            ${booking.property_State}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+
+
+        // ========================================
+        // LOGIN POPUP
+        // ========================================
+
+        const popupShown =
+            sessionStorage.getItem(
+                "upcomingBookingPopupShown"
+            );
+
+
+        if (!popupShown) {
+
+            alert(
+                "Upcoming Viewing\n\n" +
+                booking.property_Name +
+                "\n" +
+                formatDate(
+                    booking.view_Date
+                ) +
+                "\n" +
+                startTime +
+                " - " +
+                endTime +
+                "\n" +
+                "Renter: " +
+                booking.renter_Name
+            );
+
+
+            sessionStorage.setItem(
+                "upcomingBookingPopupShown",
+                "true"
+            );
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        upcomingBooking.innerHTML = `
+            <div class="empty-state">
+
+                <h3>
+                    Unable to load upcoming viewing
+                </h3>
+
+                <p>
+                    Please try again later.
+                </p>
+
+            </div>
+        `;
+    }
+}
+
+
+// ========================================
+// INITIAL LOADS
 // ========================================
 
 displayOwnerBookings();
+
+displayUpcomingOwnerBooking();

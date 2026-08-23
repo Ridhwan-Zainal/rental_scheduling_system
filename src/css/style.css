@@ -159,6 +159,9 @@ body:not(.dashboard-body) {
     opacity: 0.9;
 }
 
+.upcoming-viewing-section{
+margin:10px;
+}
 
 /* ========================================
    PROPERTY LIST
@@ -216,20 +219,27 @@ body:not(.dashboard-body) {
     margin-bottom: 15px;
 }
 
+
 /* ========================================
-   RENTER FILTER
+   RENTER PROPERTY FILTER
 ======================================== */
 
 .renter-filter {
-    max-width: 320px;
-    margin-bottom: 25px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    flex-wrap: wrap;   
 }
 
-.renter-filter label {
-    display: block;
-    margin-bottom: 7px;
+.renter-filter > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
+.renter-filter select {
+    min-width: 200px;
+}
 
 /* ========================================
    EMPTY STATE

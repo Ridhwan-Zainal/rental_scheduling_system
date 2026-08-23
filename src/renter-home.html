@@ -38,6 +38,35 @@
 
     <main class="dashboard-container">
 
+        
+                    <!-- UPCOMING VIEWING -->
+
+                    <section class="upcoming-viewing-section">
+
+                        <h2>
+                            Upcoming Viewing
+                        </h2>
+
+                        <div id="upcomingBooking">
+
+                            <div class="empty-state">
+
+                                <h3>
+                                    No upcoming viewing
+                                </h3>
+
+                                <p>
+                                    You currently have no
+                                    upcoming viewing appointments.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
         <!-- PAGE HEADING -->
 
         <section class="dashboard-heading">
@@ -54,39 +83,87 @@
         </section>
 
 
-        <!-- FILTER -->
+       <!-- FILTER -->
 
-        <section class="renter-filter">
+<section class="renter-filter">
 
-            <label for="propertyTypeFilter">
-                Property Type
-            </label>
+    <div>
+        <label for="propertyStateFilter">
+            State
+        </label>
 
-            <select id="propertyTypeFilter">
+        <select id="propertyStateFilter">
+            <option value="ALL">
+                All States
+            </option>
 
-                <option value="ALL">
-                    All Property Types
-                </option>
+            <option value="Johor">Johor</option>
+            <option value="Kedah">Kedah</option>
+            <option value="Kelantan">Kelantan</option>
+            <option value="Melaka">Melaka</option>
+            <option value="Negeri Sembilan">Negeri Sembilan</option>
+            <option value="Pahang">Pahang</option>
+            <option value="Penang">Penang</option>
+            <option value="Perak">Perak</option>
+            <option value="Perlis">Perlis</option>
+            <option value="Sabah">Sabah</option>
+            <option value="Sarawak">Sarawak</option>
+            <option value="Selangor">Selangor</option>
+            <option value="Terengganu">Terengganu</option>
+            <option value="Kuala Lumpur">Kuala Lumpur</option>
+            <option value="Putrajaya">Putrajaya</option>
+            <option value="Labuan">Labuan</option>
+        </select>
+    </div>
 
-                <option value="ROOM">
-                    Room
-                </option>
 
-                <option value="APARTMENT">
-                    Apartment
-                </option>
+    <div>
+        <label for="propertyCityFilter">
+            City
+        </label>
 
-                <option value="CONDO">
-                    Condo
-                </option>
+        <select
+            id="propertyCityFilter"
+            disabled
+        >
+            <option value="ALL">
+                All Cities
+            </option>
+        </select>
+    </div>
 
-                <option value="HOUSE">
-                    House
-                </option>
 
-            </select>
+    <div>
+        <label for="propertyTypeFilter">
+            Property Type
+        </label>
 
-        </section>
+        <select id="propertyTypeFilter">
+
+            <option value="ALL">
+                All Property Types
+            </option>
+
+            <option value="ROOM">
+                Room
+            </option>
+
+            <option value="APARTMENT">
+                Apartment
+            </option>
+
+            <option value="CONDO">
+                Condo
+            </option>
+
+            <option value="HOUSE">
+                House
+            </option>
+
+        </select>
+    </div>
+
+</section>
 
 
         <!-- PROPERTY LIST -->
@@ -100,7 +177,9 @@
     </main>
 
     <script src="js/welcome.js"></script>
+    <script src="js/property.js"></script>
     <script src="js/renter.js"></script>
+    <script src="js/renter-bookings.js"></script>
     <script src="js/logout.js"></script>
 </body>
 </html>

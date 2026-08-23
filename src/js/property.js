@@ -3,17 +3,111 @@
 // ========================================
 
 const citiesByState = {
+    
+    "Johor": [
+        "Johor Bahru",
+        "Batu Pahat",
+        "Muar",
+        "Kulai"
+    ],
+
+    "Kedah": [
+        "Alor Setar",
+        "Sungai Petani",
+        "Kulim"
+    ],
+
+    "Kelantan": [
+        "Kota Bharu",
+        "Pasir Mas",
+        "Tanah Merah"
+    ],
+
+    "Melaka": [
+        "Melaka City",
+        "Alor Gajah",
+        "Jasin"
+    ],
+
+    "Negeri Sembilan": [
+        "Seremban",
+        "Port Dickson",
+        "Nilai"
+    ],
+
+    "Pahang": [
+        "Kuantan",
+        "Temerloh",
+        "Bentong",
+        "Cameron Highlands"
+    ],
+
+    "Penang": [
+        "George Town",
+        "Bayan Lepas",
+        "Bukit Mertajam",
+        "Butterworth"
+    ],
+
+    "Perak": [
+        "Ipoh",
+        "Taiping",
+        "Teluk Intan",
+        "Lumut"
+    ],
+
+    "Perlis": [
+        "Kangar",
+        "Arau",
+        "Padang Besar"
+    ],
+
+    "Sabah": [
+        "Kota Kinabalu",
+        "Sandakan",
+        "Tawau",
+        "Lahad Datu"
+    ],
+
+    "Sarawak": [
+        "Kuching",
+        "Miri",
+        "Sibu",
+        "Bintulu"
+    ],
 
     "Selangor": [
         "Shah Alam",
         "Puchong",
         "Petaling Jaya",
-        "Subang Jaya"
+        "Subang Jaya",
+        "Klang",
+        "Kajang"
+    ],
+
+    "Terengganu": [
+        "Kuala Terengganu",
+        "Kemaman",
+        "Dungun"
     ],
 
     "Kuala Lumpur": [
         "Kuala Lumpur"
+    ],
+
+    "Putrajaya": [
+        "Putrajaya"
+    ],
+
+    "Labuan": [
+        "Labuan"
     ]
+
+
+
+
+
+
 };
 
 

@@ -3,8 +3,11 @@
 // ========================================
 
 function getCurrentUser() {
+
     return JSON.parse(
-        sessionStorage.getItem("currentUser")
+        sessionStorage.getItem(
+            "currentUser"
+        )
     );
 }
 
@@ -17,6 +20,19 @@ const renterPropertyList =
     document.getElementById(
         "renterPropertyList"
     );
+
+
+const propertyStateFilter =
+    document.getElementById(
+        "propertyStateFilter"
+    );
+
+
+const propertyCityFilter =
+    document.getElementById(
+        "propertyCityFilter"
+    );
+
 
 const propertyTypeFilter =
     document.getElementById(
@@ -41,6 +57,7 @@ async function getAvailableProperties() {
 
 
     if (!response.ok) {
+
         throw new Error(
             data.message ||
             "Unable to retrieve properties."
@@ -57,7 +74,9 @@ async function getAvailableProperties() {
 // ========================================
 
 async function displayProperties(
-    filterType = "ALL"
+    filterType = "ALL",
+    filterState = "ALL",
+    filterCity = "ALL"
 ) {
 
     if (!renterPropertyList) {
@@ -138,9 +157,57 @@ async function displayProperties(
 
             properties =
                 properties.filter(
-                    property =>
-                        property.property_Type ===
-                        filterType
+                    function (property) {
+
+                        return (
+                            property.property_Type ===
+                            filterType
+                        );
+                    }
+                );
+        }
+
+
+        // ========================================
+        // STATE FILTER
+        // ========================================
+
+        if (
+            filterState !==
+            "ALL"
+        ) {
+
+            properties =
+                properties.filter(
+                    function (property) {
+
+                        return (
+                            property.property_State ===
+                            filterState
+                        );
+                    }
+                );
+        }
+
+
+        // ========================================
+        // CITY FILTER
+        // ========================================
+
+        if (
+            filterCity !==
+            "ALL"
+        ) {
+
+            properties =
+                properties.filter(
+                    function (property) {
+
+                        return (
+                            property.property_City ===
+                            filterCity
+                        );
+                    }
                 );
         }
 
@@ -202,17 +269,18 @@ async function displayProperties(
                     </h3>
 
 
-                      ${
-                      property.property_Image_URL
-                          ? `
-                     <img
-                       src="${property.property_Image_URL}"
-                     alt="${property.property_Name}"
-                     class="property-image"
-                         >
-                         `
-                         : ""
+                    ${
+                        property.property_Image_URL
+                            ? `
+                                <img
+                                    src="${property.property_Image_URL}"
+                                    alt="${property.property_Name}"
+                                    class="property-image"
+                                >
+                            `
+                            : ""
                     }
+
 
                     <p>
                         <strong>
@@ -293,6 +361,158 @@ async function displayProperties(
 
 
 // ========================================
+// APPLY ALL PROPERTY FILTERS
+// ========================================
+
+function applyPropertyFilters() {
+
+    const selectedType =
+        propertyTypeFilter
+            ? propertyTypeFilter.value
+            : "ALL";
+
+
+    const selectedState =
+        propertyStateFilter
+            ? propertyStateFilter.value
+            : "ALL";
+
+
+    const selectedCity =
+        propertyCityFilter
+            ? propertyCityFilter.value
+            : "ALL";
+
+
+    displayProperties(
+        selectedType,
+        selectedState,
+        selectedCity
+    );
+}
+
+
+// ========================================
+// STATE FILTER CHANGE
+// ========================================
+
+if (
+    propertyStateFilter &&
+    propertyCityFilter
+) {
+
+    propertyStateFilter.addEventListener(
+        "change",
+        function () {
+
+            const selectedState =
+                propertyStateFilter.value;
+
+
+            // Reset city dropdown
+
+            propertyCityFilter.innerHTML = `
+                <option value="ALL">
+                    All Cities
+                </option>
+            `;
+
+
+            // ========================================
+            // ALL STATES
+            // ========================================
+
+            if (
+                selectedState ===
+                "ALL"
+            ) {
+
+                propertyCityFilter.disabled =
+                    true;
+            }
+
+
+            // ========================================
+            // SPECIFIC STATE
+            // ========================================
+
+            else {
+
+                propertyCityFilter.disabled =
+                    false;
+
+
+                const cities =
+                    citiesByState[
+                        selectedState
+                    ] || [];
+
+
+                cities.forEach(
+                    function (city) {
+
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+
+                        option.value =
+                            city;
+
+
+                        option.textContent =
+                            city;
+
+
+                        propertyCityFilter
+                            .appendChild(
+                                option
+                            );
+                    }
+                );
+            }
+
+
+            applyPropertyFilters();
+        }
+    );
+}
+
+
+// ========================================
+// CITY FILTER CHANGE
+// ========================================
+
+if (propertyCityFilter) {
+
+    propertyCityFilter.addEventListener(
+        "change",
+        function () {
+
+            applyPropertyFilters();
+        }
+    );
+}
+
+
+// ========================================
+// PROPERTY TYPE FILTER CHANGE
+// ========================================
+
+if (propertyTypeFilter) {
+
+    propertyTypeFilter.addEventListener(
+        "change",
+        function () {
+
+            applyPropertyFilters();
+        }
+    );
+}
+
+
+// ========================================
 // VIEW PROPERTY
 // ========================================
 
@@ -312,24 +532,6 @@ function viewProperty(
 
 
 // ========================================
-// PROPERTY FILTER
-// ========================================
-
-if (propertyTypeFilter) {
-
-    propertyTypeFilter.addEventListener(
-        "change",
-        function () {
-
-            displayProperties(
-                propertyTypeFilter.value
-            );
-        }
-    );
-}
-
-
-// ========================================
 // PROPERTY DETAILS ELEMENTS
 // ========================================
 
@@ -338,25 +540,30 @@ const propertyName =
         "propertyName"
     );
 
+
 const propertyType =
     document.getElementById(
         "propertyType"
     );
+
 
 const propertyRent =
     document.getElementById(
         "propertyRent"
     );
 
+
 const propertyDescription =
     document.getElementById(
         "propertyDescription"
     );
 
+
 const renterViewDate =
     document.getElementById(
         "renterViewDate"
     );
+
 
 const availableSlots =
     document.getElementById(
@@ -429,6 +636,10 @@ async function loadPropertyDetails() {
         }
 
 
+        // ========================================
+        // DISPLAY PROPERTY INFORMATION
+        // ========================================
+
         propertyName.textContent =
             property.property_Name;
 
@@ -454,7 +665,7 @@ async function loadPropertyDetails() {
             property.property_Unit
             property.property_GMap_URL
 
-            Those remain hidden until
+            These remain hidden until
             a booking is confirmed.
         */
 
@@ -481,6 +692,7 @@ async function displayAvailableSlots() {
         !renterViewDate ||
         !availableSlots
     ) {
+
         return;
     }
 
@@ -539,9 +751,13 @@ async function displayAvailableSlots() {
 
         const availableViewings =
             viewings.filter(
-                viewing =>
-                    viewing.view_Status ===
-                    "AVAILABLE"
+                function (viewing) {
+
+                    return (
+                        viewing.view_Status ===
+                        "AVAILABLE"
+                    );
+                }
             );
 
 

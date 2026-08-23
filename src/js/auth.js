@@ -106,6 +106,10 @@ if (loginForm) {
                     )
                 );
 
+                sessionStorage.removeItem(
+                    "upcomingBookingPopupShown"
+                );
+
 
                 // ========================================
                 // ROLE REDIRECT
